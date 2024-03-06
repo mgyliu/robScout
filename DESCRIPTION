@@ -1,0 +1,16 @@
+Package: robscout
+Title: Robust Covariance-Regularized Regression
+Version: 0.0.0.9000
+Authors@R: 
+    person("Maggie", "Liu", , "yitong.liu@stat.ubc.ca", role = c("aut", "cre"),
+           comment = c(ORCID = "0009-0007-8713-1722"))
+Description: This package implements the robust covariance-regularized 
+    regression method. It is a robust version of the Scout method, introduced
+    by Witten and Tibshirani (2009). 
+License: use_mit_license()
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.2
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
