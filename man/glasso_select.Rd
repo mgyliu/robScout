@@ -6,10 +6,13 @@
 \usage{
 glasso_select(
   X,
-  nlambda = 100,
-  lambda_min_ratio = 0.1,
-  crit = "bic",
-  standardize = TRUE,
+  standardize,
+  centerFun,
+  scaleFun,
+  cov_method,
+  crit,
+  nlambda,
+  lambda_min_ratio,
   scr = FALSE,
   verbose = FALSE
 )
@@ -17,11 +20,11 @@ glasso_select(
 \arguments{
 \item{X}{feature matrix, \eqn{n \times p}}
 
+\item{crit}{criteria to select the optimal lambda. one of "bic" or "loglik"}
+
 \item{nlambda}{number of lambdas to optimize over}
 
 \item{lambda_min_ratio}{smallest value of lambda as a fraction of lambda_max}
-
-\item{crit}{criteria to select the optimal lambda. one of "bic" or "loglik"}
 
 \item{scr}{whether to use lossy screening in huge.glasso}
 

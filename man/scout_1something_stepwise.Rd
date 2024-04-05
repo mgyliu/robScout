@@ -13,7 +13,10 @@ scout_1something_stepwise(
   lambda1.min.ratio = 0.1,
   nlambda2 = 100,
   lambda2.min.ratio = 0.1,
-  cov_method = c(),
+  cov_method = c("default", "winsor"),
+  glasso_crit = c("ebic", "bic", "loglik"),
+  ddc_first = FALSE,
+  ddc_with_response = FALSE,
   standardize = TRUE,
   centerFun = mean,
   scaleFun = sd
@@ -38,14 +41,22 @@ scout_1something_stepwise(
 
 \item{cov_method}{a string indicating which covariance matrix to use. See below for details}
 
+\item{glasso_crit}{a string indicating which criteria to minimize in glasso}
+
+\item{ddc_first}{whether or not to detect and impute cellwise outliers using
+DDC before computing estimates}
+
+\item{ddc_with_response}{whether or not to concatenate Y before running DDC. Only
+applicable if \code{ddc_first} is \code{TRUE}}
+
 \item{standardize}{whether or not to standardize variables before
 computing estiamtes}
 
 \item{centerFun}{a function to compute an estiamte of the center of a variable.
-This is ignored if standardize is FALSE}
+This is ignored if standardize is \code{FALSE}}
 
 \item{scaleFun}{a function to compute an estimate of the scale of a variable.
-This is ignored if standardize is FALSE}
+This is ignored if standardize is \code{FALSE}}
 }
 \value{
 list of
