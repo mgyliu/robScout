@@ -26,17 +26,21 @@ test_that("huge_glasso_lambda_seq produces a lambda path with the correct length
   expect_equal(test_seq[1] * lambda_min_ratio, tail(test_seq, 1))
 })
 
-test_that("icov_error works", {
+test_that("icov_eval works", {
   p <- 5
   cov <- gen_cov(p)
   # Generate inverse of covariance with small amount of error
   icov <- solve(cov) + rnorm(p^2, 0, 0.001)
-  expect_equal(length(icov_error(icov, cov, 50, "bic")), 1)
+  expect_equal(length(icov_eval(icov, cov, 50, "bic")), 1)
 })
 
 test_that("glasso_select returns a list with the right items", {
   X <- gen_data()$X
-  gs_res <- glasso_select(X, nlambda = 5, lambda_min_ratio = 0.1, crit = "bic", standardize = "TRUE", scr = FALSE, verbose = FALSE)
+  gs_res <- glasso_select(X,
+    standardize = TRUE, centerFun = mean, scaleFun = sd,
+    cov_method = "default", crit = "ebic",
+    nlambda = 5, lambda_min_ratio = 0.1
+  )
 
   # it returns the named items we expect
   expect_true(setequal(

@@ -31,24 +31,27 @@ huge_glasso_lambda_seq <- function(cov_X, nlambda, lambda_min_ratio) {
 #' * `errors`: numeric vector - `crit` values corresponding to each value in
 #' `lambda`
 #' @export
-glasso_select <- function(X, nlambda = 100, lambda_min_ratio = 0.1,
-                          crit = "bic", standardize = TRUE,
+glasso_select <- function(X,
+                          standardize, centerFun, scaleFun,
+                          cov_method, crit,
+                          nlambda, lambda_min_ratio,
                           scr = FALSE, verbose = FALSE) {
-  # Need to center and scale X
+  # Center and scale X if needed
   if (standardize) {
-    sdx <- apply(X, 2, sd)
-    X <- scale(X, T, T)
+    sdx <- apply(X, 2, scaleFun)
+    X <- apply(X, 2, function(xi) (xi - centerFun(xi)) / scaleFun(xi))
   } else {
     sdx <- rep(1, ncol(X))
-    X <- scale(X, T, F)
+    # X <- scale(X, T, F)
   }
 
-  cov_X <- cov(X)
+  cov_X <- est_cov(X, method = cov_method)
   # Pass in nlambda and lambda.min.ratio; let huge compute its own lambda sequence.
-  hg_out <- huge::huge.glasso(cov_X, nlambda = nlambda, scr = scr, verbose = verbose)
+  hg_out <- huge::huge.glasso(cov_X, nlambda = nlambda, scr = scr, verbose = verbose, lambda.min.ratio = lambda_min_ratio)
+
   # Compute error criteria for each lambda
   errors <- unlist(lapply(hg_out$icov, function(icov) {
-    icov_error(icov, cov_X, nrow(X), method = crit)
+    icov_eval(icov, cov_X, nrow(X), method = crit)
   }))
 
   lambda <- hg_out$lambda
@@ -62,14 +65,18 @@ glasso_select <- function(X, nlambda = 100, lambda_min_ratio = 0.1,
   )
 }
 
-#' Error of inverse covariance matrix estimate
+#' @title icov_eval
+#' @description Computes either a log likelihood or BIC criterion for
+#' a given precisoin matrix estimate. `bic` is the BIC described in
+#' (Yuan and Lin, 2007). `ebic` is the extended BIC described in
+#' (Foygel and Drton, 2010). `loglik` is the log likelihood
 #' @param icov inverse covariance estimate
 #' @param cov covariance estimate
 #' @param n number of rows in original data matrix
-#' @param method one of "loglik", "bic"
+#' @param method one of "loglik", "bic", "ebic"
 #' @export
-icov_error <- function(icov, cov, n, method = "loglik") {
-  stopifnot(method %in% c("loglik", "bic"))
+icov_eval <- function(icov, cov, n, method = "ebic") {
+  stopifnot(method %in% c("loglik", "bic", "ebic"))
 
   # negative log likelihood = - log |Theta| + tr(Theta * Sigma)
   neg_loglik <- -determinant(icov, logarithm = TRUE)$modulus[[1]] + sum(diag(icov %*% cov))
