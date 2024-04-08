@@ -1,8 +1,10 @@
+#' @title cov_winsor
 #' @description computes an estimate of cov(X,Y) with adjusted
 #' multivariate Winsorization, as described in Lafit et al. 2022.
 #' @param X a nxp matrix
 #' @param Y a nx1 vector or NULL
 #' @return a pxp matrix if Y is NULL; otherwise, a length-p vector.
+#' @export
 cov_winsor <- function(X, Y = NULL) {
     p <- ncol(X)
     dispersion_x <- unname(apply(X, MARGIN = 2, FUN = stats::mad))
@@ -30,12 +32,14 @@ cov_winsor <- function(X, Y = NULL) {
     }
 }
 
+#' @title est_cov
 #' @description Computes a covariance estimate based on the type
 #' specificed by the user. This function assumes that the data
 #' has already been standardized.
 #' @param X (n x p) predictor matrix
 #' @param Y (n x 1) response vector or NULL
 #' @return a (p x p) covariance matrix or length-p vector
+#' @export
 est_cov <- function(X, Y = NULL, method = c("default", "winsor")) {
     if (method == "default") {
         cov(X, Y)

@@ -119,13 +119,14 @@ cv.scout <- function(x, y, K = 10,
     invisible(object)
 }
 
-print.cvobject <- function(x, ...) {
-    if (class(x) != "cvobject") stop("Class of x must be 'cvobject', created by call to cv.scout.")
-    cat("Call:\t", fill = F)
-    dput(x$call)
-    cat("\n Cross-validation MSE for each lambda1/lambda2 pair: \n")
-    mat <- matrix(round(x$cv, 2), nrow = length(x$lam1s), ncol = length(x$lam2s))
-    dimnames(mat) <- list(round(x$lam1s, 3), round(x$lam2s, 3))
-    print(mat, quote = F)
-    invisible()
-}
+
+# print.cvobject <- function(x, ...) {
+#     if (class(x) != "cvobject") stop("Class of x must be 'cvobject', created by call to cv.scout.")
+#     cat("Call:\t", fill = F)
+#     dput(x$call)
+#     cat("\n Cross-validation MSE for each lambda1/lambda2 pair: \n")
+#     mat <- matrix(round(x$cv, 2), nrow = length(x$lam1s), ncol = length(x$lam2s))
+#     dimnames(mat) <- list(round(x$lam1s, 3), round(x$lam2s, 3))
+#     print(mat, quote = F)
+#     invisible()
+# }

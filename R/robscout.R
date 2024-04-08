@@ -1,13 +1,13 @@
-#' @title robscout
-#' @description
-#' @param X
-#' @param Y
-#' @param lam1
-#' @param lam2
-#' @param standardize
-robscout <- function(X, Y, est_type = c("glasso", "gridge"), lam1, lam2, centerFun = stats::median, scaleFun = stats::mad) {
+# #' @title robscout
+# #' @description
+# #' @param X
+# #' @param Y
+# #' @param lam1
+# #' @param lam2
+# #' @param standardize
+# robscout <- function(X, Y, est_type = c("glasso", "gridge"), lam1, lam2, centerFun = stats::median, scaleFun = stats::mad) {
 
-}
+# }
 
 
 # This code is mostly copied from https://github.com/cran/scout/blob/master/R/scout.R#L237-326
