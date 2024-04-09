@@ -1,29 +1,85 @@
 #' `huge_glasso_lambda_seq`
 #' @description
 #' Computes the lambda sequence for huge::huge.glasso
-#' @param cov_X covariance matrix estimate
+#' @param S covariance matrix estimate cov(X)
 #' @param nlambda number of lambdas to return
-#' @param lambda_min_ratio smallest value of lambda as a fraction of lambda_max
+#' @param lambda.min.ratio smallest value of lambda as a fraction of lambda_max
 #' @return numeric vector of length nlambda, in decreasing order, of log-spaced
 #' lambda values
-huge_glasso_lambda_seq <- function(cov_X, nlambda, lambda_min_ratio) {
-  p <- ncol(cov_X)
-  lambda_max <- max(abs(cov_X - diag(p)))
-  lambda_min <- lambda_min_ratio * lambda_max
-  exp(seq(log(lambda_max), log(lambda_min), length = nlambda))
+huge_glasso_lambda_seq <- function(S, nlambda, lambda.min.ratio = 0.1) {
+  d <- ncol(S)
+  lambda.max <- max(max(S - diag(d)), -min(S - diag(d)))
+  lambda.min <- lambda.min.ratio * lambda.max
+  lambda <- exp(seq(log(lambda.max), log(lambda.min), length = nlambda))
+  lambda
 }
 
+#' `glasso_cv`
+#' @description
+#' Performs K-fold cross-validation to select the best graphical model using
+#' huge::huge.glasso
+#' @param X feature matrix, \eqn{n \times p}
+#' @param standardize whether or not to standardize the data before running glasso
+#' @param centerFun a function to compute an estiamte of the center of a variable.
+#' This is ignored if standardize is `FALSE`
+#' @param scaleFun a function to compute an estimate of the scale of a variable.
+#' This is ignored if standardize is `FALSE`
+#' @param cov_method a string indicating which covariance matrix to use. One of "default" or "winsor"
+#' @param nlambda number of lambdas to optimize over
+#' @param lambda.min.ratio smallest value of lambda as a fraction of lambda_max
+#' @param crit criteria to select the optimal lambda. one of "bic" or "loglik"
+#' @param scr whether to use lossy screening in huge.glasso
+#' @param verbose whether to let huge.glasso print progress messages
+#' @return result of running huge::huge.glasso on the ideal lambda found from cv
+#' @export
+glasso_cv <- function(X, K, standardize, centerFun, scaleFun, cov_method, crit, nlambda = 100, lambda.min.ratio = 0.1, scr = FALSE, verbose = FALSE) {
+  folds <- cv.folds(nrow(X), K)
+  S <- est_cov(X, method = cov_method)
+  lambdas <- huge_glasso_lambda_seq(S, nlambda = nlambda, lambda.min.ratio = lambda.min.ratio)
+  errors <- matrix(NA, nrow = nlambda, ncol = K)
+
+  for (i in 1:K) {
+    v_idx <- folds[[i]]
+    X_train <- X[-v_idx, ]
+    X_validation <- X[v_idx, ]
+
+    res <- glasso_select(
+      X_train, est_cov(X_validation, method = cov_method),
+      standardize, centerFun, scaleFun, cov_method, crit,
+      lambdas = lambdas, scr = scr, verbose = verbose
+    )
+
+    errors[, i] <- res$errors
+  }
+
+  errors_avg_lambda <- apply(errors, MARGIN = 1, mean)
+  best_lambda <- lambdas[which.min(errors_avg_lambda)]
+  huge_res <- huge::huge.glasso(S, lambda = best_lambda, scr = scr, verbose = verbose)
+  huge_res
+}
 
 #' `glasso_select`
 #' @description
 #' Uses huge::huge.glasso to estimate an inverse covariance matrix given
 #' a data matrix.
 #' @param X feature matrix, \eqn{n \times p}
-#' @param nlambda number of lambdas to optimize over
-#' @param lambda_min_ratio smallest value of lambda as a fraction of lambda_max
+#' @param standardize whether or not to standardize the data before running glasso
+#' @param centerFun a function to compute an estiamte of the center of a variable.
+#' This is ignored if standardize is `FALSE`
+#' @param scaleFun a function to compute an estimate of the scale of a variable.
+#' This is ignored if standardize is `FALSE`
+#' @param cov_method a string indicating which covariance matrix to use. See below for details
 #' @param crit criteria to select the optimal lambda. one of "bic" or "loglik"
+#' @param nlambda number of lambdas to optimize over
+#' @param lambda.min.ratio smallest value of lambda as a fraction of lambda_max
+#' @param lambdas a sequence of lambda values (decreasing order). If provided,
+#' `nlambda` and `lambda.min.ratio` are ignored
 #' @param scr whether to use lossy screening in huge.glasso
 #' @param verbose whether to let huge.glasso print progress messages
+#' @details `cov_method` can be one of the following:
+#' * `"default"`: computes the default covariance with \code{\link{cov}}
+#' * `"winsor"`: computes the covariance matrix based on adjusted multivariate Winsorization,
+#' as seen in Lafit et al. 2022.
 #' @return list of:
 #' * `icov`: matrix - inverse covariance estimate based on best lambda
 #' * `best_lambda`: numeric - best lambda selected based on `crit`
@@ -31,10 +87,11 @@ huge_glasso_lambda_seq <- function(cov_X, nlambda, lambda_min_ratio) {
 #' * `errors`: numeric vector - `crit` values corresponding to each value in
 #' `lambda`
 #' @export
-glasso_select <- function(X,
+glasso_select <- function(X, S,
                           standardize, centerFun, scaleFun,
                           cov_method, crit,
-                          nlambda, lambda_min_ratio,
+                          nlambda = 100, lambda.min.ratio = 0.1,
+                          lambdas = NULL,
                           scr = FALSE, verbose = FALSE) {
   # Center and scale X if needed
   if (standardize) {
@@ -42,16 +99,21 @@ glasso_select <- function(X,
     X <- apply(X, 2, function(xi) (xi - centerFun(xi)) / scaleFun(xi))
   } else {
     sdx <- rep(1, ncol(X))
-    # X <- scale(X, T, F)
+    X <- apply(X, 2, function(xi) xi - centerFun(xi))
   }
 
-  cov_X <- est_cov(X, method = cov_method)
-  # Pass in nlambda and lambda.min.ratio; let huge compute its own lambda sequence.
-  hg_out <- huge::huge.glasso(cov_X, nlambda = nlambda, scr = scr, verbose = verbose, lambda.min.ratio = lambda_min_ratio)
+  S <- est_cov(X, method = cov_method)
+  hg_out <- if (is.null(lambdas)) {
+    # Pass in nlambda and lambda.min.ratio; let huge compute its own lambda sequence.
+    huge::huge.glasso(S, nlambda = nlambda, lambda.min.ratio = lambda.min.ratio, scr = scr, verbose = verbose)
+  } else {
+    # If lambdas is provided, use that and override the huge-computed sequences.
+    huge::huge.glasso(S, lambda = lambdas, scr = scr, verbose = verbose)
+  }
 
   # Compute error criteria for each lambda
   errors <- unlist(lapply(hg_out$icov, function(icov) {
-    icov_eval(icov, cov_X, nrow(X), method = crit)
+    icov_eval(icov, S, nrow(X), method = crit)
   }))
 
   lambda <- hg_out$lambda

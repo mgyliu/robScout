@@ -10,8 +10,8 @@ cv.scout_alternating_lasso(
   p1,
   nlambda1 = 100,
   nlambda2 = 100,
-  lambda1_min_ratio = 0.1,
-  lambda2_min_ratio = 0.001,
+  lambda1.min.ratio = 0.1,
+  lambda2.min.ratio = 0.001,
   K = 5,
   tol = 1e-04,
   max_iter = 10,
@@ -37,10 +37,10 @@ regularization step}
 \item{nlambda2}{number of regularization terms to use in coefficient
 regularization step}
 
-\item{lambda1_min_ratio}{smallest fraction of lambda1_max to include in
+\item{lambda1.min.ratio}{smallest fraction of lambda1_max to include in
 lambda1 sequence}
 
-\item{lambda2_min_ratio}{smallest fraction of lambda2_max to include in
+\item{lambda2.min.ratio}{smallest fraction of lambda2_max to include in
 lambda2 sequence}
 
 \item{K}{number of folds to use in cross-validation}

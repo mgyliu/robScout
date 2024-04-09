@@ -4,14 +4,14 @@
 \alias{huge_glasso_lambda_seq}
 \title{\code{huge_glasso_lambda_seq}}
 \usage{
-huge_glasso_lambda_seq(cov_X, nlambda, lambda_min_ratio)
+huge_glasso_lambda_seq(S, nlambda, lambda.min.ratio = 0.1)
 }
 \arguments{
-\item{cov_X}{covariance matrix estimate}
+\item{S}{covariance matrix estimate cov(X)}
 
 \item{nlambda}{number of lambdas to return}
 
-\item{lambda_min_ratio}{smallest value of lambda as a fraction of lambda_max}
+\item{lambda.min.ratio}{smallest value of lambda as a fraction of lambda_max}
 }
 \value{
 numeric vector of length nlambda, in decreasing order, of log-spaced

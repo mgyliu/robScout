@@ -12,7 +12,7 @@ get_lambda2_path(
   cov_xy,
   p2,
   nlambda = 100,
-  lambda_min_ratio = 0.001,
+  lambda.min.ratio = 0.001,
   desc_frac = 0.8,
   max_iter = 100
 )
@@ -33,7 +33,7 @@ Ignored if greater than 1}
 
 \item{nlambda}{how many lambda2's do you want to regularize over?}
 
-\item{lambda_min_ratio}{smallest value for lambda2 as a fraction of
+\item{lambda.min.ratio}{smallest value for lambda2 as a fraction of
 lambda2_max.}
 
 \item{desc_frac}{by how much to multiply lambda_max when tuning it in

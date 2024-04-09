@@ -16,14 +16,14 @@ gen_data <- function(n = 5, p = 5) {
 test_that("huge_glasso_lambda_seq produces a lambda path with the correct length and values", {
   p <- 5
   cov_X <- matrix(rnorm(p^2), nrow = 5)
-  lambda_min_ratio <- 0.01
+  lambda.min.ratio <- 0.01
   nlambda <- 10
 
-  test_seq <- huge_glasso_lambda_seq(cov_X, nlambda, lambda_min_ratio)
+  test_seq <- huge_glasso_lambda_seq(cov_X, nlambda, lambda.min.ratio)
   # Length should be correct
   expect_equal(length(test_seq), nlambda)
   # Should be decreasing, and ratio should be correct
-  expect_equal(test_seq[1] * lambda_min_ratio, tail(test_seq, 1))
+  expect_equal(test_seq[1] * lambda.min.ratio, tail(test_seq, 1))
 })
 
 test_that("icov_eval works", {
@@ -36,10 +36,11 @@ test_that("icov_eval works", {
 
 test_that("glasso_select returns a list with the right items", {
   X <- gen_data()$X
-  gs_res <- glasso_select(X,
+  S <- cov(X)
+  gs_res <- glasso_select(X, S,
     standardize = TRUE, centerFun = mean, scaleFun = sd,
     cov_method = "default", crit = "ebic",
-    nlambda = 5, lambda_min_ratio = 0.1
+    nlambda = 5, lambda.min.ratio = 0.1
   )
 
   # it returns the named items we expect
@@ -52,4 +53,9 @@ test_that("glasso_select returns a list with the right items", {
     gs_res$errors[which(gs_res$best_lambda == gs_res$lambda)],
     min(gs_res$errors)
   )
+})
+
+test_that("glasso_cv works", {
+  X <- gen_data()$X
+  expect_no_error(glasso_cv(X, 3, TRUE, mean, sd, "default", "bic"))
 })

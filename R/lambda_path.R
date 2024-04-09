@@ -8,14 +8,14 @@
 #' @param p1 type of regularization in first scout step. Can be NULL or 1.
 #' Ignored if greater than 1
 #' @param nlambda how many lambda1's do you want to regularize over?
-#' @param lambda_min_ratio smallest value for lambda1 as a fraction of
+#' @param lambda.min.ratio smallest value for lambda1 as a fraction of
 #' lambda1_max.
 #' @param desc_frac by how much to multiply lambda_max when tuning it in
 #' bisection search for the "ideal" lambda_max
 #' @param max_iter maximum number of iterations to use to find the lowest
 #' lambda_max in bisection search
 get_lambda1_path <- function(cov_x, p1,
-                             nlambda = 100, lambda_min_ratio = 0.1,
+                             nlambda = 100, lambda.min.ratio = 0.1,
                              desc_frac = 0.8, max_iter = 100) {
   if (is.null(p1)) {
     return(0)
@@ -23,7 +23,7 @@ get_lambda1_path <- function(cov_x, p1,
     return(0)
   } else if (p1 == 1 | p1 == 2) {
     # TODO: figure out lambda sequence for p1 == 2
-    return(huge_glasso_lambda_seq(cov_x, nlambda = nlambda, lambda_min_ratio = lambda_min_ratio))
+    return(huge_glasso_lambda_seq(cov_x, nlambda = nlambda, lambda.min.ratio = lambda.min.ratio))
   } else {
     warning(paste0("get_lambda1_path not implemented for p1 == ", p1, ". Returning default sequence which may not work the best."))
     return(seq(0.01, 0.2, len = nlambda))
@@ -47,20 +47,20 @@ get_lambda1_path <- function(cov_x, p1,
 #' lambda2_max depends on the step 1 result using lambda1
 #' @param cov_xy estimate for cov(X,Y)
 #' @param nlambda how many lambda2's do you want to regularize over?
-#' @param lambda_min_ratio smallest value for lambda2 as a fraction of
+#' @param lambda.min.ratio smallest value for lambda2 as a fraction of
 #' lambda2_max.
 #' @param desc_frac by how much to multiply lambda_max when tuning it in
 #' bisection search for the "ideal" lambda_max
 #' @param max_iter maximum number of iterations to use to find the lowest
 #' lambda_max in bisection search
 get_lambda2_path <- function(X, Y, cov_x, cov_xy, p2,
-                             nlambda = 100, lambda_min_ratio = 0.001,
+                             nlambda = 100, lambda.min.ratio = 0.001,
                              desc_frac = 0.8, max_iter = 100) {
   if (is.null(p2)) {
     return(0)
   } else if (p2 == 1) {
     lambda_max <- get_lambda2_max_lasso(X, Y, cov_x, cov_xy)
-    return(get_lambda_path(lambda_max, nlambda, lambda_min_ratio))
+    return(get_lambda_path(lambda_max, nlambda, lambda.min.ratio))
   } else {
     warning(paste0("get_lambda2_path not implemented for p2 == ", p2, ". Returning default sequence which may not work the best."))
     return(seq(0.001, 0.2, len = nlambda))
@@ -135,8 +135,8 @@ get_lambda2_max_lasso <- function(X, Y, cov_x, cov_xy, desc_frac = 0.8, max_iter
   lambda2_max
 }
 
-get_lambda_path <- function(lambda_max, nlambda, lambda_min_ratio) {
-  lambdapath <- exp(seq(log(lambda_max), log(lambda_max * lambda_min_ratio),
+get_lambda_path <- function(lambda_max, nlambda, lambda.min.ratio) {
+  lambdapath <- exp(seq(log(lambda_max), log(lambda_max * lambda.min.ratio),
     length.out = nlambda
   ))
   digits <- 10

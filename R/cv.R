@@ -46,8 +46,8 @@ cv.folds <- function(n, folds = 10) {
 #' @export
 cv.scout <- function(x, y, K = 10,
                      p1 = 2, p2 = 1,
-                     nlambda1 = 100, lambda1_min_ratio = 0.01,
-                     nlambda2 = 100, lambda2_min_ratio = 0.001,
+                     nlambda1 = 100, lambda1.min.ratio = 0.01,
+                     nlambda2 = 100, lambda2.min.ratio = 0.001,
                      lam1s = NULL, # seq(0.001, .2, len = 10),
                      lam2s = NULL, # seq(0.001, .2, len = 10),
                      rescale = TRUE, standardize = TRUE,
@@ -64,7 +64,7 @@ cv.scout <- function(x, y, K = 10,
         lam1s <- get_lambda1_path(
             est_cov(x_std, method = cov_method), p1,
             nlambda = nlambda1,
-            lambda_min_ratio = lambda1_min_ratio
+            lambda.min.ratio = lambda1.min.ratio
         )
     }
     if (is.null(lam2s)) {
@@ -74,7 +74,7 @@ cv.scout <- function(x, y, K = 10,
             est_cov(x_std, y_std, method = cov_method),
             p2,
             nlambda = nlambda2,
-            lambda_min_ratio = lambda2_min_ratio
+            lambda.min.ratio = lambda2.min.ratio
         )
     }
 

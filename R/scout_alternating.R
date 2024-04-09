@@ -178,9 +178,9 @@ get_best_lam1 <- function(X_train, Y_train, X_test, Y_test,
 #' regularization step
 #' @param nlambda2 number of regularization terms to use in coefficient
 #' regularization step
-#' @param lambda1_min_ratio smallest fraction of lambda1_max to include in
+#' @param lambda1.min.ratio smallest fraction of lambda1_max to include in
 #' lambda1 sequence
-#' @param lambda2_min_ratio smallest fraction of lambda2_max to include in
+#' @param lambda2.min.ratio smallest fraction of lambda2_max to include in
 #' lambda2 sequence
 #' @param tol convergence tolerance for difference between previous estimated
 #' rmspe and current estimated rmspe. if the difference becomes smaller than
@@ -209,7 +209,7 @@ get_best_lam1 <- function(X_train, Y_train, X_test, Y_test,
 #' @export
 scout_alternating_lasso <- function(X_train, Y_train, X_test, Y_test, p1,
                                     nlambda1 = 100, nlambda2 = 100,
-                                    lambda1_min_ratio = 0.1, lambda2_min_ratio = 0.001,
+                                    lambda1.min.ratio = 0.1, lambda2.min.ratio = 0.001,
                                     tol = 1e-4, max_iter = 10,
                                     rescale = TRUE, standardize = TRUE,
                                     centerFun = mean, scaleFun = sd,
@@ -239,7 +239,7 @@ scout_alternating_lasso <- function(X_train, Y_train, X_test, Y_test, p1,
   niter <- 0
 
   # Get lambda 1 sequence
-  lam1s <- get_lambda1_path(est_cov(X_train, method = cov_method), p1, nlambda1, lambda1_min_ratio)
+  lam1s <- get_lambda1_path(est_cov(X_train, method = cov_method), p1, nlambda1, lambda1.min.ratio)
   xtxs <- get_xtxs(X_train, p1, lam1s, cov_method)
 
   # Compute inital lambda1
@@ -273,7 +273,7 @@ scout_alternating_lasso <- function(X_train, Y_train, X_test, Y_test, p1,
 
     # Compute best lambda2 for the current cov_x_est
     cov_xy_est <- est_cov(X_train, Y_train, method = cov_method)
-    lam2s <- get_lambda2_path(X_train, Y_train, cov_x_est, cov_xy_est, 1, nlambda2, lambda2_min_ratio)
+    lam2s <- get_lambda2_path(X_train, Y_train, cov_x_est, cov_xy_est, 1, nlambda2, lambda2.min.ratio)
     best_lam2_res <- get_best_lam2_lasso(
       X_train, Y_train, X_test, Y_test,
       meanx, meany, sdx, sdy,
@@ -341,9 +341,9 @@ scout_alternating_lasso <- function(X_train, Y_train, X_test, Y_test, p1,
 #' regularization step
 #' @param nlambda2 number of regularization terms to use in coefficient
 #' regularization step
-#' @param lambda1_min_ratio smallest fraction of lambda1_max to include in
+#' @param lambda1.min.ratio smallest fraction of lambda1_max to include in
 #' lambda1 sequence
-#' @param lambda2_min_ratio smallest fraction of lambda2_max to include in
+#' @param lambda2.min.ratio smallest fraction of lambda2_max to include in
 #' lambda2 sequence
 #' @param K number of folds to use in cross-validation
 #' @param tol convergence tolerance for difference between previous estimated
@@ -369,7 +369,7 @@ scout_alternating_lasso <- function(X_train, Y_train, X_test, Y_test, p1,
 #' @export
 cv.scout_alternating_lasso <- function(X_train, Y_train, p1,
                                        nlambda1 = 100, nlambda2 = 100,
-                                       lambda1_min_ratio = 0.1, lambda2_min_ratio = 0.001,
+                                       lambda1.min.ratio = 0.1, lambda2.min.ratio = 0.001,
                                        K = 5, tol = 1e-4, max_iter = 10,
                                        rescale = TRUE, standardize = TRUE,
                                        centerFun = mean, scaleFun = sd,
@@ -385,7 +385,7 @@ cv.scout_alternating_lasso <- function(X_train, Y_train, p1,
     Y_val <- Y_train[validation_idx, ]
     scout_alternating_lasso(
       X_train_cv, Y_train_cv, X_val, Y_val, p1,
-      nlambda1, nlambda2, lambda1_min_ratio, lambda2_min_ratio,
+      nlambda1, nlambda2, lambda1.min.ratio, lambda2.min.ratio,
       tol, max_iter, rescale, standardize, centerFun, scaleFun,
       lam1_init, cov_method
     )

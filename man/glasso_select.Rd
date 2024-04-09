@@ -6,13 +6,15 @@
 \usage{
 glasso_select(
   X,
+  S,
   standardize,
   centerFun,
   scaleFun,
   cov_method,
   crit,
-  nlambda,
-  lambda_min_ratio,
+  nlambda = 100,
+  lambda.min.ratio = 0.1,
+  lambdas = NULL,
   scr = FALSE,
   verbose = FALSE
 )
@@ -20,11 +22,24 @@ glasso_select(
 \arguments{
 \item{X}{feature matrix, \eqn{n \times p}}
 
+\item{standardize}{whether or not to standardize the data before running glasso}
+
+\item{centerFun}{a function to compute an estiamte of the center of a variable.
+This is ignored if standardize is \code{FALSE}}
+
+\item{scaleFun}{a function to compute an estimate of the scale of a variable.
+This is ignored if standardize is \code{FALSE}}
+
+\item{cov_method}{a string indicating which covariance matrix to use. See below for details}
+
 \item{crit}{criteria to select the optimal lambda. one of "bic" or "loglik"}
 
 \item{nlambda}{number of lambdas to optimize over}
 
-\item{lambda_min_ratio}{smallest value of lambda as a fraction of lambda_max}
+\item{lambda.min.ratio}{smallest value of lambda as a fraction of lambda_max}
+
+\item{lambdas}{a sequence of lambda values (decreasing order). If provided,
+\code{nlambda} and \code{lambda.min.ratio} are ignored}
 
 \item{scr}{whether to use lossy screening in huge.glasso}
 
@@ -43,4 +58,12 @@ list of:
 \description{
 Uses huge::huge.glasso to estimate an inverse covariance matrix given
 a data matrix.
+}
+\details{
+\code{cov_method} can be one of the following:
+\itemize{
+\item \code{"default"}: computes the default covariance with \code{\link{cov}}
+\item \code{"winsor"}: computes the covariance matrix based on adjusted multivariate Winsorization,
+as seen in Lafit et al. 2022.
+}
 }
