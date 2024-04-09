@@ -34,7 +34,12 @@ huge_glasso_lambda_seq <- function(S, nlambda, lambda.min.ratio = 0.1) {
 #' @export
 glasso_cv <- function(X, K, standardize, centerFun, scaleFun, cov_method, crit, nlambda = 100, lambda.min.ratio = 0.1, scr = FALSE, verbose = FALSE) {
   folds <- cv.folds(nrow(X), K)
-  S <- est_cov(X, method = cov_method)
+  S <- if (standardize) {
+    X_std <- apply(X, 2, function(xi) (xi - centerFun(xi)) / scaleFun(xi))
+    est_cov(X_std, method = cov_method)
+  } else {
+    est_cov(X, method = cov_method)
+  }
   lambdas <- huge_glasso_lambda_seq(S, nlambda = nlambda, lambda.min.ratio = lambda.min.ratio)
   errors <- matrix(NA, nrow = nlambda, ncol = K)
 
