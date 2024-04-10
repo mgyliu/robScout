@@ -17,5 +17,8 @@ a pxp matrix if Y is NULL; otherwise, a length-p vector.
 \description{
 computes an estimate of cov(X,Y) with adjusted
 multivariate Winsorization, as described in Lafit et al. 2022.
-Assumes that the data is centered already.
+This function will standardize the data using median and mad.
+Hence, if the data has already been standardized with those
+robust center and scale functions, standardization here
+will have no effect.
 }

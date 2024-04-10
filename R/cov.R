@@ -1,7 +1,10 @@
 #' @title cov_winsor
 #' @description computes an estimate of cov(X,Y) with adjusted
 #' multivariate Winsorization, as described in Lafit et al. 2022.
-#' Assumes that the data is centered already.
+#' This function will standardize the data using median and mad.
+#' Hence, if the data has already been standardized with those
+#' robust center and scale functions, standardization here
+#' will have no effect.
 #' @param X a nxp matrix
 #' @param Y a nx1 vector or NULL
 #' @return a pxp matrix if Y is NULL; otherwise, a length-p vector.
@@ -10,24 +13,23 @@ cov_winsor <- function(X, Y = NULL) {
     p <- ncol(X)
     dispersion_x <- unname(apply(X, MARGIN = 2, FUN = stats::mad))
     dispersion_y <- stats::mad(Y)
-    # If Y is NULL, compute cov(X)
-    if (is.null(Y)) {
+    X <- robustHD::robStandardize(X, median, mad)
+    if (!is.null(Y)) Y <- robustHD::robStandardize(Y, median, mad)
+
+    if (is.null(Y)) { # If Y is NULL, compute cov(X)
         cormat <- matrix(NA, nrow = p, ncol = p)
         # j and k index the columns of X
         for (j in 1:p) {
             for (k in 1:p) {
-                cormat[j, k] <- robustHD::corHuber(X[, j], X[, k], type = "bivariate", standardized = FALSE)
+                cormat[j, k] <- robustHD::corHuber(X[, j], X[, k], type = "bivariate", standardized = TRUE)
             }
         }
         winsor_cov <- diag(dispersion_x) %*% cormat %*% diag(dispersion_x)
         return(as.matrix(Matrix::nearPD(winsor_cov)$mat))
-    }
-
-    # If Y is not NULL, compute cov(X,Y)
-    else {
+    } else { # If Y is not NULL, compute cov(X,Y)
         cormat <- rep(NA, p)
         for (j in 1:p) {
-            cormat[j] <- robustHD::corHuber(X[, j], Y, type = "bivariate", standardized = FALSE)
+            cormat[j] <- robustHD::corHuber(X[, j], Y, type = "bivariate", standardized = TRUE)
         }
         return(cormat * dispersion_x * dispersion_y)
     }

@@ -9,7 +9,7 @@ test_that("cov_winsor works for cov(X) or cov(X,Y)", {
   expect_equal(length(cov_winsor(X, Y)), p)
 })
 
-test_that("est_cov works", {
+test_that("est_cov works for all available options", {
   p <- 5
   X <- MASS::mvrnorm(10, rep(0, p), diag(p))
   Y <- rnorm(10)
