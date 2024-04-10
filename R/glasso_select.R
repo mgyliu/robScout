@@ -66,9 +66,11 @@ glasso_cv <- function(X, K, standardize, centerFun, scaleFun, cov_method, crit, 
 
   errors_avg_lambda <- apply(errors, MARGIN = 1, mean)
   best_lambda <- lambdas[which.min(errors_avg_lambda)]
-  huge_res <- huge::huge.glasso(S, lambda = best_lambda, scr = scr, verbose = verbose)
-  huge_res$lambda_seq <- lambdas
-  huge_res
+  retval <- huge::huge.glasso(S, lambda = best_lambda, scr = scr, verbose = verbose)
+  retval$lambda_seq <- lambdas
+  retval$crit <- errors
+
+  retval
 }
 
 #' `glasso_select`
