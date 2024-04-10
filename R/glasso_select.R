@@ -48,7 +48,7 @@ glasso_cv <- function(X, K, standardize, centerFun, scaleFun, cov_method, crit, 
     lambdas <- huge_glasso_lambda_seq(S, nlambda = nlambda, lambda.min.ratio = lambda.min.ratio)
   }
 
-  errors <- matrix(NA, nrow = nlambda, ncol = K)
+  errors <- matrix(NA, nrow = length(lambdas), ncol = K)
 
   for (i in 1:K) {
     v_idx <- folds[[i]]

@@ -59,3 +59,12 @@ test_that("glasso_cv works", {
   X <- gen_data()$X
   expect_no_error(glasso_cv(X, 3, TRUE, mean, sd, "default", "bic"))
 })
+
+test_that("glasso_cv should use provided lambda seq if it's available", {
+  X <- gen_data()$X
+  my_lambdas <- seq(0.1, 0.9, 0.1)
+  cv_K <- 3
+  res <- glasso_cv(X, cv_K, TRUE, mean, sd, "default", "loglik", lambdas = my_lambdas)
+  expect_identical(res$lambda_seq, my_lambdas)
+  expect_true(all(dim(res$crit) == c(length(my_lambdas), cv_K)))
+})
