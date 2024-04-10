@@ -80,6 +80,7 @@ glasso_cv <- function(X, K, standardize, centerFun, scaleFun, cov_method, crit, 
   retval$lambda_seq <- lambdas
   retval$crit <- errors
   retval$cv.folds <- folds
+  retval$input.cov <- S
 
   retval
 }

@@ -82,3 +82,10 @@ test_that("glasso_cv should use the provided cv folds if it's not NULL", {
   expect_no_error(res2 <- glasso_cv(X, 2, TRUE, mean, sd, "default", "loglik"))
   expect_identical(res2$cv.folds, expected_folds)
 })
+
+test_that("glasso_cv returns the correct covariance estimate that was used for huge", {
+  X <- gen_data(n = 10)$X
+  X_std <- robustHD::robStandardize(X, median, mad)
+  res <- glasso_cv(X_std, 2, FALSE, mean, sd, "winsor", "loglik")
+  expect_identical(res$input.cov, est_cov(X_std, method = "winsor"))
+})
