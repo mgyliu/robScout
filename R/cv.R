@@ -1,3 +1,11 @@
+#' cv.folds
+#' @description split n data points into a specific number of folds.
+#' This function was copied over from CRAN/scout
+#' @param n number of observations to split
+#' @param folds number of folds to create
+#' @returns a list of length 5, where each item in the list is a vector
+#' of test set indices.
+#' @export
 cv.folds <- function(n, folds = 10) {
     split(sample(1:n), rep(1:folds, length = n))
 }
