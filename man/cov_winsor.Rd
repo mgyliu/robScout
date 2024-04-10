@@ -17,4 +17,5 @@ a pxp matrix if Y is NULL; otherwise, a length-p vector.
 \description{
 computes an estimate of cov(X,Y) with adjusted
 multivariate Winsorization, as described in Lafit et al. 2022.
+Assumes that the data is centered already.
 }

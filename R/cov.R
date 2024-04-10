@@ -1,6 +1,7 @@
 #' @title cov_winsor
 #' @description computes an estimate of cov(X,Y) with adjusted
 #' multivariate Winsorization, as described in Lafit et al. 2022.
+#' Assumes that the data is centered already.
 #' @param X a nxp matrix
 #' @param Y a nx1 vector or NULL
 #' @return a pxp matrix if Y is NULL; otherwise, a length-p vector.

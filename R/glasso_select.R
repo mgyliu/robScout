@@ -6,6 +6,7 @@
 #' @param lambda.min.ratio smallest value of lambda as a fraction of lambda_max
 #' @return numeric vector of length nlambda, in decreasing order, of log-spaced
 #' lambda values
+#' @export
 huge_glasso_lambda_seq <- function(S, nlambda, lambda.min.ratio = 0.1) {
   d <- ncol(S)
   lambda.max <- max(max(S - diag(d)), -min(S - diag(d)))
@@ -60,6 +61,7 @@ glasso_cv <- function(X, K, standardize, centerFun, scaleFun, cov_method, crit, 
   errors_avg_lambda <- apply(errors, MARGIN = 1, mean)
   best_lambda <- lambdas[which.min(errors_avg_lambda)]
   huge_res <- huge::huge.glasso(S, lambda = best_lambda, scr = scr, verbose = verbose)
+  huge_res$lambda_seq <- lambdas
   huge_res
 }
 
