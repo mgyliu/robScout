@@ -14,6 +14,7 @@ glasso_cv(
   crit,
   nlambda = 100,
   lambda.min.ratio = 0.1,
+  lambdas = NULL,
   scr = FALSE,
   verbose = FALSE
 )
@@ -36,6 +37,9 @@ This is ignored if standardize is \code{FALSE}}
 \item{nlambda}{number of lambdas to optimize over}
 
 \item{lambda.min.ratio}{smallest value of lambda as a fraction of lambda_max}
+
+\item{lambdas}{sequence of lambda values. This function will generate its own lambda sequence
+if this is NULL. If provided, \code{nlambda} and \code{lambda.min.ratio} are ignored.}
 
 \item{scr}{whether to use lossy screening in huge.glasso}
 

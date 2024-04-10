@@ -28,12 +28,14 @@ huge_glasso_lambda_seq <- function(S, nlambda, lambda.min.ratio = 0.1) {
 #' @param cov_method a string indicating which covariance matrix to use. One of "default" or "winsor"
 #' @param nlambda number of lambdas to optimize over
 #' @param lambda.min.ratio smallest value of lambda as a fraction of lambda_max
+#' @param lambdas sequence of lambda values. This function will generate its own lambda sequence
+#' if this is NULL. If provided, `nlambda` and `lambda.min.ratio` are ignored.
 #' @param crit criteria to select the optimal lambda. one of "bic" or "loglik"
 #' @param scr whether to use lossy screening in huge.glasso
 #' @param verbose whether to let huge.glasso print progress messages
 #' @return result of running huge::huge.glasso on the ideal lambda found from cv
 #' @export
-glasso_cv <- function(X, K, standardize, centerFun, scaleFun, cov_method, crit, nlambda = 100, lambda.min.ratio = 0.1, scr = FALSE, verbose = FALSE) {
+glasso_cv <- function(X, K, standardize, centerFun, scaleFun, cov_method, crit, nlambda = 100, lambda.min.ratio = 0.1, lambdas = NULL, scr = FALSE, verbose = FALSE) {
   folds <- cv.folds(nrow(X), K)
   S <- if (standardize) {
     X_std <- apply(X, 2, function(xi) (xi - centerFun(xi)) / scaleFun(xi))
@@ -41,7 +43,11 @@ glasso_cv <- function(X, K, standardize, centerFun, scaleFun, cov_method, crit, 
   } else {
     est_cov(X, method = cov_method)
   }
-  lambdas <- huge_glasso_lambda_seq(S, nlambda = nlambda, lambda.min.ratio = lambda.min.ratio)
+
+  if (is.null(lambdas)) {
+    lambdas <- huge_glasso_lambda_seq(S, nlambda = nlambda, lambda.min.ratio = lambda.min.ratio)
+  }
+
   errors <- matrix(NA, nrow = nlambda, ncol = K)
 
   for (i in 1:K) {
