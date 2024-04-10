@@ -12,6 +12,7 @@ glasso_cv(
   scaleFun,
   cov_method,
   crit,
+  folds = NULL,
   nlambda = 100,
   lambda.min.ratio = 0.1,
   lambdas = NULL,
@@ -33,6 +34,8 @@ This is ignored if standardize is \code{FALSE}}
 \item{cov_method}{a string indicating which covariance matrix to use. One of "default" or "winsor"}
 
 \item{crit}{criteria to select the optimal lambda. one of "bic" or "loglik"}
+
+\item{folds}{a list of length K containing the indices of the test set in each CV fold}
 
 \item{nlambda}{number of lambdas to optimize over}
 

@@ -60,11 +60,25 @@ test_that("glasso_cv works", {
   expect_no_error(glasso_cv(X, 3, TRUE, mean, sd, "default", "bic"))
 })
 
-test_that("glasso_cv should use provided lambda seq if it's available", {
+test_that("glasso_cv should use provided lambda seq if it's not NULL", {
   X <- gen_data()$X
   my_lambdas <- seq(0.1, 0.9, 0.1)
   cv_K <- 3
   res <- glasso_cv(X, cv_K, TRUE, mean, sd, "default", "loglik", lambdas = my_lambdas)
   expect_identical(res$lambda_seq, my_lambdas)
   expect_true(all(dim(res$crit) == c(length(my_lambdas), cv_K)))
+})
+
+test_that("glasso_cv should use the provided cv folds if it's not NULL", {
+  X <- gen_data(n = 10)$X
+  my_folds <- list(c(1:5), c(6:10))
+  expect_no_error(res <- glasso_cv(X, 2, TRUE, mean, sd, "default", "loglik", folds = my_folds))
+  expect_identical(res$cv.folds, my_folds)
+
+  # without providing folds
+  set.seed(2024)
+  expected_folds <- cv.folds(10, 2)
+  set.seed(2024)
+  expect_no_error(res2 <- glasso_cv(X, 2, TRUE, mean, sd, "default", "loglik"))
+  expect_identical(res2$cv.folds, expected_folds)
 })

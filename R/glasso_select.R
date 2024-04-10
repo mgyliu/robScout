@@ -26,6 +26,7 @@ huge_glasso_lambda_seq <- function(S, nlambda, lambda.min.ratio = 0.1) {
 #' @param scaleFun a function to compute an estimate of the scale of a variable.
 #' This is ignored if standardize is `FALSE`
 #' @param cov_method a string indicating which covariance matrix to use. One of "default" or "winsor"
+#' @param folds a list of length K containing the indices of the test set in each CV fold
 #' @param nlambda number of lambdas to optimize over
 #' @param lambda.min.ratio smallest value of lambda as a fraction of lambda_max
 #' @param lambdas sequence of lambda values. This function will generate its own lambda sequence
@@ -35,8 +36,17 @@ huge_glasso_lambda_seq <- function(S, nlambda, lambda.min.ratio = 0.1) {
 #' @param verbose whether to let huge.glasso print progress messages
 #' @return result of running huge::huge.glasso on the ideal lambda found from cv
 #' @export
-glasso_cv <- function(X, K, standardize, centerFun, scaleFun, cov_method, crit, nlambda = 100, lambda.min.ratio = 0.1, lambdas = NULL, scr = FALSE, verbose = FALSE) {
-  folds <- cv.folds(nrow(X), K)
+glasso_cv <- function(X, K, standardize, centerFun, scaleFun, cov_method, crit, folds = NULL, nlambda = 100, lambda.min.ratio = 0.1, lambdas = NULL, scr = FALSE, verbose = FALSE) {
+  if (is.null(folds)) {
+    folds <- cv.folds(nrow(X), K)
+  } else {
+    # if user provided folds, do some checks to make sure they are valid
+    stopifnot("folds should be of list type" = "list" %in% class(folds))
+    stopifnot("length of folds should be the same as K" = length(folds) == K)
+    all_fold_idx_valid <- all(lapply(folds, function(idx_vec) length(setdiff(idx_vec, 1:nrow(X)))) == 0)
+    stopifnot("each set of indices in folds must be in the range of 1:nrow(X)" = all_fold_idx_valid)
+  }
+
   S <- if (standardize) {
     X_std <- apply(X, 2, function(xi) (xi - centerFun(xi)) / scaleFun(xi))
     est_cov(X_std, method = cov_method)
@@ -69,6 +79,7 @@ glasso_cv <- function(X, K, standardize, centerFun, scaleFun, cov_method, crit, 
   retval <- huge::huge.glasso(S, lambda = best_lambda, scr = scr, verbose = verbose)
   retval$lambda_seq <- lambdas
   retval$crit <- errors
+  retval$cv.folds <- folds
 
   retval
 }
