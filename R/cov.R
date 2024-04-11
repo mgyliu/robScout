@@ -27,11 +27,23 @@ cov_winsor <- function(X, Y = NULL) {
         winsor_cov <- diag(dispersion_x) %*% cormat %*% diag(dispersion_x)
         return(as.matrix(Matrix::nearPD(winsor_cov)$mat))
     } else { # If Y is not NULL, compute cov(X,Y)
-        cormat <- rep(NA, p)
+        cormat <- matrix(NA, nrow = p, ncol = 1)
         for (j in 1:p) {
-            cormat[j] <- robustHD::corHuber(X[, j], Y, type = "bivariate", standardized = TRUE)
+            cormat[j, ] <- robustHD::corHuber(X[, j], Y, type = "bivariate", standardized = TRUE)
         }
         return(cormat * dispersion_x * dispersion_y)
+    }
+}
+
+cov_wrap <- function(X, Y = NULL) {
+    locScaleX <- cellWise::estLocScale(X)
+    Xw <- cellWise::wrap(X, locScaleX$loc, locScaleX$scale)$Xw
+    if (is.null(Y)) {
+        return(cov(Xw))
+    } else {
+        locScaleY <- cellWise::estLocScale(Y)
+        Yw <- cellWise::wrap(Y, locScaleY$loc, locScaleY$scale)$Xw
+        return(cov(Xw, Yw))
     }
 }
 
@@ -41,13 +53,17 @@ cov_winsor <- function(X, Y = NULL) {
 #' has already been standardized.
 #' @param X (n x p) predictor matrix
 #' @param Y (n x 1) response vector or NULL
+#' @param method string indicating which covariance estimator
+#' to compute. One of "default", "winsor", or "wrap".
 #' @return a (p x p) covariance matrix or length-p vector
 #' @export
-est_cov <- function(X, Y = NULL, method = c("default", "winsor")) {
+est_cov <- function(X, Y = NULL, method = c("default", "winsor", "wrap")) {
     if (method == "default") {
         cov(X, Y)
     } else if (method == "winsor") {
         cov_winsor(X, Y)
+    } else if (method == "wrap") {
+        cov_wrap(X, Y)
     } else {
         warning(glue::glue("Cov method {method} is not implemented. Using default."))
         cov(X, Y)

@@ -7,9 +7,6 @@
 glasso_cv(
   X,
   K,
-  standardize,
-  centerFun,
-  scaleFun,
   cov_method,
   crit,
   folds = NULL,
@@ -22,14 +19,6 @@ glasso_cv(
 }
 \arguments{
 \item{X}{feature matrix, \eqn{n \times p}}
-
-\item{standardize}{whether or not to standardize the data before running glasso}
-
-\item{centerFun}{a function to compute an estiamte of the center of a variable.
-This is ignored if standardize is \code{FALSE}}
-
-\item{scaleFun}{a function to compute an estimate of the scale of a variable.
-This is ignored if standardize is \code{FALSE}}
 
 \item{cov_method}{a string indicating which covariance matrix to use. One of "default" or "winsor"}
 

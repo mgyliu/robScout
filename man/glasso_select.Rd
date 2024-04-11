@@ -7,9 +7,6 @@
 glasso_select(
   X,
   X.test,
-  standardize,
-  centerFun,
-  scaleFun,
   cov_method,
   crit,
   nlambda = 100,
@@ -23,14 +20,6 @@ glasso_select(
 \item{X}{feature matrix, \eqn{n_1 \times p}}
 
 \item{X.test}{feature matrix to test against, \eqn{n_2 \times p}}
-
-\item{standardize}{whether or not to standardize the data before running glasso}
-
-\item{centerFun}{a function to compute an estiamte of the center of a variable.
-This is ignored if standardize is \code{FALSE}}
-
-\item{scaleFun}{a function to compute an estimate of the scale of a variable.
-This is ignored if standardize is \code{FALSE}}
 
 \item{cov_method}{a string indicating which covariance matrix to use. See below for details}
 

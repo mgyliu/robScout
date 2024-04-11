@@ -17,7 +17,30 @@ test_that("est_cov works for all available options", {
   cov_default <- est_cov(X, method = "default")
   expect_true("matrix" %in% class(cov_default))
   expect_equal(dim(cov_default), c(p, p))
+
   cov_winsor <- est_cov(X, method = "winsor")
   expect_identical(cov_winsor, cov_winsor(X))
+
+  cov_wrap <- est_cov(X, method = "wrap")
+  expect_identical(cov_wrap, cov_wrap(X))
+
   expect_warning(est_cov(X, method = "not implemented"), "not implemented")
+})
+
+test_that("est_cov works for all methods when computing cov(X,Y)", {
+  p <- 5
+  X <- MASS::mvrnorm(10, rep(0, p), diag(p))
+  Y <- rnorm(10)
+
+  cov_default <- est_cov(X, Y, method = "default")
+  expect_true("matrix" %in% class(cov_default))
+  expect_equal(dim(cov_default), c(p, 1))
+
+  cov_winsor <- est_cov(X, Y, method = "winsor")
+  expect_identical(cov_winsor, cov_winsor(X, Y))
+  expect_equal(dim(cov_winsor), c(p, 1))
+
+  cov_wrap <- est_cov(X, Y, method = "wrap")
+  expect_identical(cov_wrap, cov_wrap(X, Y))
+  expect_equal(dim(cov_wrap), c(p, 1))
 })

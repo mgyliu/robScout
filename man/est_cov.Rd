@@ -4,12 +4,15 @@
 \alias{est_cov}
 \title{est_cov}
 \usage{
-est_cov(X, Y = NULL, method = c("default", "winsor"))
+est_cov(X, Y = NULL, method = c("default", "winsor", "wrap"))
 }
 \arguments{
 \item{X}{(n x p) predictor matrix}
 
 \item{Y}{(n x 1) response vector or NULL}
+
+\item{method}{string indicating which covariance estimator
+to compute. One of "default", "winsor", or "wrap".}
 }
 \value{
 a (p x p) covariance matrix or length-p vector
