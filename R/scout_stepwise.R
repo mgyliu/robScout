@@ -60,8 +60,7 @@ scout_1something_stepwise <- function(X, Y, p2, K = 5,
 
     # First use glasso to find best lambda1
     g.res <- glasso_select(
-        X,
-        S = est_cov(X, method = cov_method),
+        X, X,
         standardize = standardize, centerFun = centerFun, scaleFun = scaleFun,
         cov_method = cov_method, crit = glasso_crit,
         nlambda = nlambda1, lambda.min.ratio = lambda1.min.ratio,

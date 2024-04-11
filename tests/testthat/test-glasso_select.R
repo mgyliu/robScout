@@ -36,8 +36,8 @@ test_that("icov_eval works", {
 
 test_that("glasso_select returns a list with the right items", {
   X <- gen_data()$X
-  S <- cov(X)
-  gs_res <- glasso_select(X, S,
+  X.test <- gen_data(n = 10)$X
+  gs_res <- glasso_select(X, X.test,
     standardize = TRUE, centerFun = mean, scaleFun = sd,
     cov_method = "default", crit = "ebic",
     nlambda = 5, lambda.min.ratio = 0.1
@@ -56,12 +56,12 @@ test_that("glasso_select returns a list with the right items", {
 })
 
 test_that("glasso_cv works", {
-  X <- gen_data()$X
-  expect_no_error(glasso_cv(X, 3, TRUE, mean, sd, "default", "bic"))
+  X <- gen_data(n = 10)$X
+  expect_no_error(glasso_cv(X, 2, TRUE, mean, sd, "default", "bic"))
 })
 
 test_that("glasso_cv should use provided lambda seq if it's not NULL", {
-  X <- gen_data()$X
+  X <- gen_data(n = 15)$X
   my_lambdas <- seq(0.1, 0.9, 0.1)
   cv_K <- 3
   res <- glasso_cv(X, cv_K, TRUE, mean, sd, "default", "loglik", lambdas = my_lambdas)

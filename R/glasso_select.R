@@ -66,7 +66,7 @@ glasso_cv <- function(X, K, standardize, centerFun, scaleFun, cov_method, crit, 
     X_validation <- X[v_idx, ]
 
     res <- glasso_select(
-      X_train, est_cov(X_validation, method = cov_method),
+      X_train, X_validation,
       standardize, centerFun, scaleFun, cov_method, crit,
       lambdas = lambdas, scr = scr, verbose = verbose
     )
@@ -89,7 +89,8 @@ glasso_cv <- function(X, K, standardize, centerFun, scaleFun, cov_method, crit, 
 #' @description
 #' Uses huge::huge.glasso to estimate an inverse covariance matrix given
 #' a data matrix.
-#' @param X feature matrix, \eqn{n \times p}
+#' @param X feature matrix, \eqn{n_1 \times p}
+#' @param X.test feature matrix to test against, \eqn{n_2 \times p}
 #' @param standardize whether or not to standardize the data before running glasso
 #' @param centerFun a function to compute an estiamte of the center of a variable.
 #' This is ignored if standardize is `FALSE`
@@ -114,7 +115,7 @@ glasso_cv <- function(X, K, standardize, centerFun, scaleFun, cov_method, crit, 
 #' * `errors`: numeric vector - `crit` values corresponding to each value in
 #' `lambda`
 #' @export
-glasso_select <- function(X, S,
+glasso_select <- function(X, X.test,
                           standardize, centerFun, scaleFun,
                           cov_method, crit,
                           nlambda = 100, lambda.min.ratio = 0.1,
@@ -122,14 +123,14 @@ glasso_select <- function(X, S,
                           scr = FALSE, verbose = FALSE) {
   # Center and scale X if needed
   if (standardize) {
-    sdx <- apply(X, 2, scaleFun)
     X <- apply(X, 2, function(xi) (xi - centerFun(xi)) / scaleFun(xi))
   } else {
-    sdx <- rep(1, ncol(X))
     X <- apply(X, 2, function(xi) xi - centerFun(xi))
   }
 
   S <- est_cov(X, method = cov_method)
+  S.test <- est_cov(X.test, method = cov_method)
+
   hg_out <- if (is.null(lambdas)) {
     # Pass in nlambda and lambda.min.ratio; let huge compute its own lambda sequence.
     huge::huge.glasso(S, nlambda = nlambda, lambda.min.ratio = lambda.min.ratio, scr = scr, verbose = verbose)
@@ -140,7 +141,7 @@ glasso_select <- function(X, S,
 
   # Compute error criteria for each lambda
   errors <- unlist(lapply(hg_out$icov, function(icov) {
-    icov_eval(icov, S, nrow(X), method = crit)
+    icov_eval(icov, S.test, nrow(X), method = crit)
   }))
 
   lambda <- hg_out$lambda

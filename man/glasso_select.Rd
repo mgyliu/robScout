@@ -6,7 +6,7 @@
 \usage{
 glasso_select(
   X,
-  S,
+  X.test,
   standardize,
   centerFun,
   scaleFun,
@@ -20,7 +20,9 @@ glasso_select(
 )
 }
 \arguments{
-\item{X}{feature matrix, \eqn{n \times p}}
+\item{X}{feature matrix, \eqn{n_1 \times p}}
+
+\item{X.test}{feature matrix to test against, \eqn{n_2 \times p}}
 
 \item{standardize}{whether or not to standardize the data before running glasso}
 
