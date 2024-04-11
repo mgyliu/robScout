@@ -38,7 +38,6 @@ test_that("glasso_select returns a list with the right items", {
   X <- gen_data()$X
   X.test <- gen_data(n = 10)$X
   gs_res <- glasso_select(X, X.test,
-    standardize = TRUE, centerFun = mean, scaleFun = sd,
     cov_method = "default", crit = "ebic",
     nlambda = 5, lambda.min.ratio = 0.1
   )
@@ -57,14 +56,14 @@ test_that("glasso_select returns a list with the right items", {
 
 test_that("glasso_cv works", {
   X <- gen_data(n = 10)$X
-  expect_no_error(glasso_cv(X, 2, TRUE, mean, sd, "default", "bic"))
+  expect_no_error(glasso_cv(X, 2, "default", "bic"))
 })
 
 test_that("glasso_cv should use provided lambda seq if it's not NULL", {
   X <- gen_data(n = 15)$X
   my_lambdas <- seq(0.1, 0.9, 0.1)
   cv_K <- 3
-  res <- glasso_cv(X, cv_K, TRUE, mean, sd, "default", "loglik", lambdas = my_lambdas)
+  res <- glasso_cv(X, cv_K, "default", "loglik", lambdas = my_lambdas)
   expect_identical(res$lambda_seq, my_lambdas)
   expect_true(all(dim(res$crit) == c(length(my_lambdas), cv_K)))
 })
@@ -72,20 +71,19 @@ test_that("glasso_cv should use provided lambda seq if it's not NULL", {
 test_that("glasso_cv should use the provided cv folds if it's not NULL", {
   X <- gen_data(n = 10)$X
   my_folds <- list(c(1:5), c(6:10))
-  expect_no_error(res <- glasso_cv(X, 2, TRUE, mean, sd, "default", "loglik", folds = my_folds))
+  expect_no_error(res <- glasso_cv(X, 2, "default", "loglik", folds = my_folds))
   expect_identical(res$cv.folds, my_folds)
 
   # without providing folds
   set.seed(2024)
   expected_folds <- cv.folds(10, 2)
   set.seed(2024)
-  expect_no_error(res2 <- glasso_cv(X, 2, TRUE, mean, sd, "default", "loglik"))
+  expect_no_error(res2 <- glasso_cv(X, 2, "default", "loglik"))
   expect_identical(res2$cv.folds, expected_folds)
 })
 
 test_that("glasso_cv returns the correct covariance estimate that was used for huge", {
   X <- gen_data(n = 10)$X
-  X_std <- robustHD::robStandardize(X, median, mad)
-  res <- glasso_cv(X_std, 2, FALSE, mean, sd, "winsor", "loglik")
-  expect_identical(res$input.cov, est_cov(X_std, method = "winsor"))
+  res <- glasso_cv(X, 2, "winsor", "loglik")
+  expect_identical(res$input.cov, est_cov(X, method = "winsor"))
 })

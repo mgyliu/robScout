@@ -20,11 +20,6 @@ huge_glasso_lambda_seq <- function(S, nlambda, lambda.min.ratio = 0.1) {
 #' Performs K-fold cross-validation to select the best graphical model using
 #' huge::huge.glasso
 #' @param X feature matrix, \eqn{n \times p}
-#' @param standardize whether or not to standardize the data before running glasso
-#' @param centerFun a function to compute an estiamte of the center of a variable.
-#' This is ignored if standardize is `FALSE`
-#' @param scaleFun a function to compute an estimate of the scale of a variable.
-#' This is ignored if standardize is `FALSE`
 #' @param cov_method a string indicating which covariance matrix to use. One of "default" or "winsor"
 #' @param folds a list of length K containing the indices of the test set in each CV fold
 #' @param nlambda number of lambdas to optimize over
@@ -36,7 +31,7 @@ huge_glasso_lambda_seq <- function(S, nlambda, lambda.min.ratio = 0.1) {
 #' @param verbose whether to let huge.glasso print progress messages
 #' @return result of running huge::huge.glasso on the ideal lambda found from cv
 #' @export
-glasso_cv <- function(X, K, standardize, centerFun, scaleFun, cov_method, crit, folds = NULL, nlambda = 100, lambda.min.ratio = 0.1, lambdas = NULL, scr = FALSE, verbose = FALSE) {
+glasso_cv <- function(X, K, cov_method, crit, folds = NULL, nlambda = 100, lambda.min.ratio = 0.1, lambdas = NULL, scr = FALSE, verbose = FALSE) {
   if (is.null(folds)) {
     folds <- cv.folds(nrow(X), K)
   } else {
@@ -47,12 +42,7 @@ glasso_cv <- function(X, K, standardize, centerFun, scaleFun, cov_method, crit, 
     stopifnot("each set of indices in folds must be in the range of 1:nrow(X)" = all_fold_idx_valid)
   }
 
-  S <- if (standardize) {
-    X_std <- apply(X, 2, function(xi) (xi - centerFun(xi)) / scaleFun(xi))
-    est_cov(X_std, method = cov_method)
-  } else {
-    est_cov(X, method = cov_method)
-  }
+  S <- est_cov(X, method = cov_method)
 
   if (is.null(lambdas)) {
     lambdas <- huge_glasso_lambda_seq(S, nlambda = nlambda, lambda.min.ratio = lambda.min.ratio)
@@ -67,7 +57,7 @@ glasso_cv <- function(X, K, standardize, centerFun, scaleFun, cov_method, crit, 
 
     res <- glasso_select(
       X_train, X_validation,
-      standardize, centerFun, scaleFun, cov_method, crit,
+      cov_method, crit,
       lambdas = lambdas, scr = scr, verbose = verbose
     )
 
@@ -91,11 +81,6 @@ glasso_cv <- function(X, K, standardize, centerFun, scaleFun, cov_method, crit, 
 #' a data matrix.
 #' @param X feature matrix, \eqn{n_1 \times p}
 #' @param X.test feature matrix to test against, \eqn{n_2 \times p}
-#' @param standardize whether or not to standardize the data before running glasso
-#' @param centerFun a function to compute an estiamte of the center of a variable.
-#' This is ignored if standardize is `FALSE`
-#' @param scaleFun a function to compute an estimate of the scale of a variable.
-#' This is ignored if standardize is `FALSE`
 #' @param cov_method a string indicating which covariance matrix to use. See below for details
 #' @param crit criteria to select the optimal lambda. one of "bic" or "loglik"
 #' @param nlambda number of lambdas to optimize over
@@ -116,18 +101,10 @@ glasso_cv <- function(X, K, standardize, centerFun, scaleFun, cov_method, crit, 
 #' `lambda`
 #' @export
 glasso_select <- function(X, X.test,
-                          standardize, centerFun, scaleFun,
                           cov_method, crit,
                           nlambda = 100, lambda.min.ratio = 0.1,
                           lambdas = NULL,
                           scr = FALSE, verbose = FALSE) {
-  # Center and scale X if needed
-  if (standardize) {
-    X <- apply(X, 2, function(xi) (xi - centerFun(xi)) / scaleFun(xi))
-  } else {
-    X <- apply(X, 2, function(xi) xi - centerFun(xi))
-  }
-
   S <- est_cov(X, method = cov_method)
   S.test <- est_cov(X.test, method = cov_method)
 
