@@ -47,6 +47,17 @@ cov_wrap <- function(X, Y = NULL) {
     }
 }
 
+cov_ddc <- function(X, Y = NULL) {
+    Ximp <- cellWise::DDC(X, DDCpars = list(fastDDC = TRUE, silent = TRUE))$Ximp
+    if (is.null(Y)) {
+        return(cov(Ximp))
+    } else {
+        stop("cov_ddc not yet implemented for Y=NULL")
+        # Yimp <- cellWise::DDC(as.matrix(Y, ncol = 1), DDCpars = list(fastDDC = TRUE, silent = TRUE))$Ximp
+        # return(cov(Ximp, Yimp))
+    }
+}
+
 #' @title est_cov
 #' @description Computes a covariance estimate based on the type
 #' specificed by the user. This function assumes that the data
@@ -54,16 +65,18 @@ cov_wrap <- function(X, Y = NULL) {
 #' @param X (n x p) predictor matrix
 #' @param Y (n x 1) response vector or NULL
 #' @param method string indicating which covariance estimator
-#' to compute. One of "default", "winsor", or "wrap".
+#' to compute. One of "default", "winsor", "wrap", "ddc".
 #' @return a (p x p) covariance matrix or length-p vector
 #' @export
-est_cov <- function(X, Y = NULL, method = c("default", "winsor", "wrap")) {
+est_cov <- function(X, Y = NULL, method = c("default", "winsor", "wrap", "ddc")) {
     if (method == "default") {
         cov(X, Y)
     } else if (method == "winsor") {
         cov_winsor(X, Y)
     } else if (method == "wrap") {
         cov_wrap(X, Y)
+    } else if (method == "ddc") {
+        cov_ddc(X, Y)
     } else {
         warning(glue::glue("Cov method {method} is not implemented. Using default."))
         cov(X, Y)
