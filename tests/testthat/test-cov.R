@@ -46,10 +46,8 @@ test_that("est_cov works for all methods when computing cov(X,Y)", {
   expect_identical(cov_winsor, cov_winsor(X, Y))
   expect_equal(dim(cov_winsor), c(p, 1))
 
-  # TODO need to think abt how cov_ddc will work with X and Y
-  # cov_ddc <- est_cov(X, Y, method = "ddc")
-  expect_error(est_cov(X, Y, method = "ddc"))
-  # expect_equal(dim(cov_ddc), c(p, 1))
+  cov_ddc <- est_cov(X, Y, method = "ddc")
+  expect_equal(dim(cov_ddc), c(p, 1))
 
   cov_wrap <- est_cov(X, Y, method = "wrap")
   expect_identical(cov_wrap, cov_wrap(X, Y))

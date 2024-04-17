@@ -52,9 +52,7 @@ cov_ddc <- function(X, Y = NULL) {
     if (is.null(Y)) {
         return(cov(Ximp))
     } else {
-        stop("cov_ddc not yet implemented for Y=NULL")
-        # Yimp <- cellWise::DDC(as.matrix(Y, ncol = 1), DDCpars = list(fastDDC = TRUE, silent = TRUE))$Ximp
-        # return(cov(Ximp, Yimp))
+        return(cov(Ximp, Y))
     }
 }
 
