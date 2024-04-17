@@ -33,6 +33,12 @@ test_that("est_cov works for all available options", {
   expect_warning(est_cov(X, method = "not implemented"), "not implemented")
 })
 
+test_that("cov_winsor works when X is univariate", {
+  X <- matrix(rnorm(10), ncol = 1)
+  expect_equal(dim(est_cov(X, method = "default")), c(1, 1))
+  expect_equal(dim(est_cov(X, method = "winsor")), c(1, 1))
+})
+
 test_that("est_cov works for all methods when computing cov(X,Y)", {
   p <- 5
   X <- MASS::mvrnorm(10, rep(0, p), diag(p))

@@ -24,7 +24,9 @@ cov_winsor <- function(X, Y = NULL) {
                 cormat[j, k] <- robustHD::corHuber(X[, j], X[, k], type = "bivariate", standardized = TRUE)
             }
         }
-        winsor_cov <- diag(dispersion_x) %*% cormat %*% diag(dispersion_x)
+        disp_x_mat <- matrix(0, nrow = p, ncol = p)
+        diag(disp_x_mat) <- dispersion_x
+        winsor_cov <- disp_x_mat %*% cormat %*% disp_x_mat
         return(as.matrix(Matrix::nearPD(winsor_cov)$mat))
     } else { # If Y is not NULL, compute cov(X,Y)
         cormat <- matrix(NA, nrow = p, ncol = 1)
