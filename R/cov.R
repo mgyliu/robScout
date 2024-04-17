@@ -50,7 +50,13 @@ cov_wrap <- function(X, Y = NULL) {
 }
 
 cov_ddc <- function(X, Y = NULL) {
-    Ximp <- cellWise::DDC(X, DDCpars = list(fastDDC = TRUE, silent = TRUE))$Ximp
+    Ximp <- if (ncol(X) < 2) {
+        warning("Input data X had fewer than 2 columns. Skipping DDC step.")
+        X
+    } else {
+        cellWise::DDC(X, DDCpars = list(fastDDC = TRUE, silent = TRUE))$Ximp
+    }
+
     if (is.null(Y)) {
         return(cov(Ximp))
     } else {

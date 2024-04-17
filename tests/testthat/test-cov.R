@@ -39,6 +39,12 @@ test_that("cov_winsor works when X is univariate", {
   expect_equal(dim(est_cov(X, method = "winsor")), c(1, 1))
 })
 
+test_that("cov_ddc warns if input data has too few columns", {
+  X <- matrix(rnorm(10), ncol = 1)
+  expect_warning(est <- est_cov(X, method = "ddc"))
+  expect_equal(dim(est), c(1, 1))
+})
+
 test_that("est_cov works for all methods when computing cov(X,Y)", {
   p <- 5
   X <- MASS::mvrnorm(10, rep(0, p), diag(p))
