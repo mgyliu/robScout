@@ -110,10 +110,10 @@ glasso_select <- function(X, X.test,
 
   hg_out <- if (is.null(lambdas)) {
     # Pass in nlambda and lambda.min.ratio; let huge compute its own lambda sequence.
-    huge::huge.glasso(S, nlambda = nlambda, lambda.min.ratio = lambda.min.ratio, scr = scr, verbose = verbose)
+    huge::huge.glasso(S, nlambda = nlambda, lambda.min.ratio = lambda.min.ratio, scr = scr, verbose = verbose, cov.output = TRUE)
   } else {
     # If lambdas is provided, use that and override the huge-computed sequences.
-    huge::huge.glasso(S, lambda = lambdas, scr = scr, verbose = verbose)
+    huge::huge.glasso(S, lambda = lambdas, scr = scr, verbose = verbose, cov.output = TRUE)
   }
 
   # Compute error criteria for each lambda
@@ -125,6 +125,7 @@ glasso_select <- function(X, X.test,
   best_idx <- which.min(errors)
   best_lambda <- lambda[best_idx]
   icovx <- hg_out$icov[[best_idx]]
+  covx <- hg_out$cov[[best_idx]]
 
   list(
     icovx = icovx, best_lambda = best_lambda,

@@ -58,9 +58,10 @@ scout_1something_stepwise <- function(X, Y, p2, K = 5,
         }
     }
 
-    # First use glasso to find best lambda1
+    # Use standardized X to find best lambda1
+    X_std <- robustHD::robStandardize(X, centerFun = centerFun, scaleFun = scaleFun)
     g.res <- glasso_select(
-        X, X,
+        X_std, X_std, # X and X test are the same, assuming we're using a BIC or loglik
         cov_method = cov_method, crit = glasso_crit,
         nlambda = nlambda1, lambda.min.ratio = lambda1.min.ratio,
     )
