@@ -45,7 +45,7 @@ test_that("glasso_select returns a list with the right items", {
   # it returns the named items we expect
   expect_true(setequal(
     names(gs_res),
-    c("icovx", "best_lambda", "lambda", "errors")
+    c("icovx", "covx", "best_lambda", "lambda", "errors")
   ))
   # it returns the correct best_lambda
   expect_equal(

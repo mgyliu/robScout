@@ -128,7 +128,7 @@ glasso_select <- function(X, X.test,
   covx <- hg_out$cov[[best_idx]]
 
   list(
-    icovx = icovx, best_lambda = best_lambda,
+    icovx = icovx, covx = covx, best_lambda = best_lambda,
     lambda = lambda, errors = errors
   )
 }
