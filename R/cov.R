@@ -7,9 +7,10 @@
 #' will have no effect.
 #' @param X a nxp matrix
 #' @param Y a nx1 vector or NULL
+#' @param correlation if TRUE, returns a correlation matrix
 #' @return a pxp matrix if Y is NULL; otherwise, a length-p vector.
 #' @export
-cov_winsor <- function(X, Y = NULL) {
+cov_winsor <- function(X, Y = NULL, correlation = FALSE) {
     p <- ncol(X)
     dispersion_x <- unname(apply(X, MARGIN = 2, FUN = stats::mad))
     dispersion_y <- stats::mad(Y)
@@ -24,6 +25,9 @@ cov_winsor <- function(X, Y = NULL) {
                 cormat[j, k] <- robustHD::corHuber(X[, j], X[, k], type = "bivariate", standardized = TRUE)
             }
         }
+        if (correlation) {
+            return(cormat)
+        }
         disp_x_mat <- matrix(0, nrow = p, ncol = p)
         diag(disp_x_mat) <- dispersion_x
         winsor_cov <- disp_x_mat %*% cormat %*% disp_x_mat
@@ -33,23 +37,34 @@ cov_winsor <- function(X, Y = NULL) {
         for (j in 1:p) {
             cormat[j, ] <- robustHD::corHuber(X[, j], Y, type = "bivariate", standardized = TRUE)
         }
+        if (correlation) {
+            return(cormat)
+        }
         return(cormat * dispersion_x * dispersion_y)
     }
 }
 
-cov_wrap <- function(X, Y = NULL) {
+cov_wrap <- function(X, Y = NULL, correlation = FALSE) {
     locScaleX <- cellWise::estLocScale(X)
     Xw <- cellWise::wrap(X, locScaleX$loc, locScaleX$scale)$Xw
     if (is.null(Y)) {
-        return(cov(Xw))
+        if (correlation) {
+            return(cor(Xw))
+        } else {
+            return(cov(Xw))
+        }
     } else {
         locScaleY <- cellWise::estLocScale(Y)
         Yw <- cellWise::wrap(Y, locScaleY$loc, locScaleY$scale)$Xw
-        return(cov(Xw, Yw))
+        if (correlation) {
+            return(cor(Xw, Yw))
+        } else {
+            return(cov(Xw, Yw))
+        }
     }
 }
 
-cov_ddc <- function(X, Y = NULL) {
+cov_ddc <- function(X, Y = NULL, correlation = FALSE) {
     Ximp <- if (ncol(X) < 2) {
         warning("Input data X had fewer than 2 columns. Skipping DDC step.")
         X
@@ -58,9 +73,17 @@ cov_ddc <- function(X, Y = NULL) {
     }
 
     if (is.null(Y)) {
-        return(cov(Ximp))
+        if (correlation) {
+            return(cor(Ximp))
+        } else {
+            return(cov(Ximp))
+        }
     } else {
-        return(cov(Ximp, Y))
+        if (correlation) {
+            return(cor(Ximp, Y))
+        } else {
+            return(cov(Ximp, Y))
+        }
     }
 }
 
@@ -72,20 +95,29 @@ cov_ddc <- function(X, Y = NULL) {
 #' @param Y (n x 1) response vector or NULL
 #' @param method string indicating which covariance estimator
 #' to compute. One of "default", "winsor", "wrap", "ddc".
+#' @param correlation if TRUE, returns a correlation matrix
 #' @return a (p x p) covariance matrix or length-p vector
 #' @export
-est_cov <- function(X, Y = NULL, method = c("default", "winsor", "wrap", "ddc")) {
+est_cov <- function(X, Y = NULL, method = c("default", "winsor", "wrap", "ddc"), correlation = FALSE) {
     if (method == "default") {
-        cov(X, Y)
+        if (correlation) {
+            cor(X, Y)
+        } else {
+            cov(X, Y)
+        }
     } else if (method == "winsor") {
-        cov_winsor(X, Y)
+        cov_winsor(X, Y, correlation = correlation)
     } else if (method == "wrap") {
-        cov_wrap(X, Y)
+        cov_wrap(X, Y, correlation = correlation)
     } else if (method == "ddc") {
-        cov_ddc(X, Y)
+        cov_ddc(X, Y, correlation = correlation)
     } else {
         warning(glue::glue("Cov method {method} is not implemented. Using default."))
-        cov(X, Y)
+        if (correlation) {
+            cor(X, Y)
+        } else {
+            cov(X, Y)
+        }
     }
 
     # TODO implement other robust covariance estimates

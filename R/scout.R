@@ -115,6 +115,7 @@ scout <- function(x, y, newx = NULL, p1 = 2, p2 = 1,
     if (ncol(x) >= nrow(x) && p1 == 0 && p2 == 0) {
         stop("p1 and p2 cannot both be zero when p>n.")
     }
+    c.betamat <- NA
     if (p1 == 0) {
         betamat <- array(NA, dim = c(1, length(lam2s), ncol(x)))
         for (j in 1:length(lam2s)) {
@@ -136,7 +137,8 @@ scout <- function(x, y, newx = NULL, p1 = 2, p2 = 1,
             }
         }
     } else if (p1 == 1) {
-        betamat <- scout1something(x, y, p2, lam1s, lam2s, rescale, cov_method)
+        # betamat <- scout1something(x, y, p2, lam1s, lam2s, rescale, cov_method)
+        betamat <- scout1something.huge(x, y, p2, lam1s, lam2s, rescale, cov_method, scaleFun)
     } else if (p1 == 2) {
         betamat <- scout2something(x, y, p2, lam1s, lam2s, rescale, cov_method)
     }
