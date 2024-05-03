@@ -65,16 +65,16 @@ compute_rmspe_betamat <- function(X_test, Y_test, intercepts, betamat) {
 }
 
 #' Rescales beta estimates as in Step 4 of the Scout algo (Witten & Tibshirani)
-#' @param X_train standardized training data
-#' @param Y_train standardized training response
+#' @param X standardized training data
+#' @param Y standardized training response
 #' @param betamat a matrix where each column is a beta_hat estimate for some
 #' regularization parameter
-rescale_betas <- function(X_train, Y_train, betamat) {
+rescale_betas <- function(X, Y, betamat) {
   rescaled <- apply(betamat, MARGIN = 2, FUN = function(beta_hat) {
     if (all(beta_hat == 0)) {
       rep(0, length(beta_hat))
     } else {
-      beta_hat * lsfit(X_train %*% beta_hat, Y_train, intercept = FALSE)$coef
+      beta_hat * lsfit(X %*% beta_hat, Y, intercept = FALSE)$coef
     }
   })
   rescaled
@@ -82,25 +82,25 @@ rescale_betas <- function(X_train, Y_train, betamat) {
 
 # assume: p2 = 1
 # get_lam2_sequence(cov_x_est)
-get_best_lam2_lasso <- function(X_train, Y_train, X_test, Y_test,
+get_best_lam2_lasso <- function(X, Y, X_test, Y_test,
                                 meanx, meany, sdx, sdy,
                                 cov_x_est, lam2s, rescale, cov_method) {
   # Initialize beta_hat estimates. The beta_hat for a given lambda2 goes into
   # that lambda2's column index.
-  betamat <- matrix(NA, nrow = ncol(X_train), ncol = length(lam2s))
+  betamat <- matrix(NA, nrow = ncol(X), ncol = length(lam2s))
   beta <- NA
   for (i in 1:length(lam2s)) {
     if (i == 1) {
-      beta <- scout::crossProdLasso(cov_x_est, est_cov(X_train, Y_train, method = cov_method), rho = lam2s[i])$beta
+      beta <- scout::crossProdLasso(cov_x_est, est_cov(X, Y, method = cov_method), rho = lam2s[i])$beta
     } else {
-      beta <- scout::crossProdLasso(cov_x_est, est_cov(X_train, Y_train, method = cov_method), rho = lam2s[i], beta.init = beta)$beta
+      beta <- scout::crossProdLasso(cov_x_est, est_cov(X, Y, method = cov_method), rho = lam2s[i], beta.init = beta)$beta
     }
     betamat[, i] <- beta
   }
 
   # Rescale betas if needed (Scout procedure Step 4)
   if (rescale) {
-    betamat <- rescale_betas(X_train, Y_train, betamat)
+    betamat <- rescale_betas(X, Y, betamat)
   }
 
   # Estimate intercepts
@@ -122,26 +122,26 @@ get_best_lam2_lasso <- function(X_train, Y_train, X_test, Y_test,
   )
 }
 
-get_best_lam1 <- function(X_train, Y_train, X_test, Y_test,
+get_best_lam1 <- function(X, Y, X_test, Y_test,
                           meanx, meany, sdx, sdy,
                           p1, lam1s, xtxs, lam2, rescale, cov_method) {
-  # xtxs <- get_xtxs(X_train, p1, lam1s)
+  # xtxs <- get_xtxs(X, p1, lam1s)
   # Initialize beta_hat estimates. The beta_hat for a given lambda2 goes into
   # that lambda2's column index.
-  betamat <- matrix(NA, nrow = ncol(X_train), ncol = length(lam1s))
+  betamat <- matrix(NA, nrow = ncol(X), ncol = length(lam1s))
   beta <- NA
   for (i in 1:length(lam1s)) {
     if (i == 1) {
-      beta <- scout::crossProdLasso(xtxs[[i]], est_cov(X_train, Y_train, cov_method), rho = lam2)$beta
+      beta <- scout::crossProdLasso(xtxs[[i]], est_cov(X, Y, cov_method), rho = lam2)$beta
     } else {
-      beta <- scout::crossProdLasso(xtxs[[i]], est_cov(X_train, Y_train, cov_method), rho = lam2, beta.init = beta)$beta
+      beta <- scout::crossProdLasso(xtxs[[i]], est_cov(X, Y, cov_method), rho = lam2, beta.init = beta)$beta
     }
     betamat[, i] <- beta
   }
 
   # Rescale betas if needed (Scout procedure Step 4)
   if (rescale) {
-    betamat <- rescale_betas(X_train, Y_train, betamat)
+    betamat <- rescale_betas(X, Y, betamat)
   }
 
   # Estimate intercepts
@@ -168,9 +168,9 @@ get_best_lam1 <- function(X_train, Y_train, X_test, Y_test,
 #' @description implements an alternating search algorithm to efficiently
 #' search over a grid of lambda1 x lambda2. L_p penalty for coefficient
 #' regularization is assumed to be 1 (i.e., p2 = 1)
-#' @param X_train A matrix of predictors. Rows are observations and columns
+#' @param X A matrix of predictors. Rows are observations and columns
 #' are variables
-#' @param Y_train A vector of outcomes
+#' @param Y A vector of outcomes
 #' @param X_test A matrix of predictors (test set)
 #' @param Y_test A vector of outcomes (test set)
 #' @param p1 L_p penalty for covariance regularization. must be 1 or 2
@@ -207,7 +207,7 @@ get_best_lam1 <- function(X_train, Y_train, X_test, Y_test,
 #' Incides of each list or vector (other than lambda2_paths) correspond to
 #' the lambda pair at that index in lambda_pairs
 #' @export
-scout_alternating_lasso <- function(X_train, Y_train, X_test, Y_test, p1,
+scout_alternating_lasso <- function(X, Y, X_test, Y_test, p1,
                                     nlambda1 = 100, nlambda2 = 100,
                                     lambda1.min.ratio = 0.1, lambda2.min.ratio = 0.001,
                                     tol = 1e-4, max_iter = 10,
@@ -219,19 +219,19 @@ scout_alternating_lasso <- function(X_train, Y_train, X_test, Y_test, p1,
   stopifnot(lam1_init %in% c("random", "max", "min"))
 
   # Standardize training data if needed
-  meany <- centerFun(Y_train)
-  meanx <- apply(X_train, 2, centerFun)
+  meany <- centerFun(Y)
+  meanx <- apply(X, 2, centerFun)
   if (standardize) {
-    sdy <- scaleFun(Y_train)
-    sdx <- apply(X_train, 2, scaleFun)
-    X_train <- robustHD::standardize(X_train, centerFun = centerFun, scaleFun = scaleFun)
+    sdy <- scaleFun(Y)
+    sdx <- apply(X, 2, scaleFun)
+    X <- robustHD::standardize(X, centerFun = centerFun, scaleFun = scaleFun)
   } else {
     # center with centerFun
-    X_train <- apply(X_train, 2, function(xi) xi - centerFun(xi))
-    sdx <- rep(1, ncol(X_train))
+    X <- apply(X, 2, function(xi) xi - centerFun(xi))
+    sdx <- rep(1, ncol(X))
     sdy <- 1
   }
-  Y_train <- (Y_train - meany) / sdy
+  Y <- (Y - meany) / sdy
 
   # diff keeps track of the difference between current RMSE and previous RMSE
   # niter keeps track of how many loops we did so far
@@ -239,8 +239,8 @@ scout_alternating_lasso <- function(X_train, Y_train, X_test, Y_test, p1,
   niter <- 0
 
   # Get lambda 1 sequence
-  lam1s <- get_lambda1_path(est_cov(X_train, method = cov_method), p1, nlambda1, lambda1.min.ratio)
-  xtxs <- get_xtxs(X_train, p1, lam1s, cov_method)
+  lam1s <- get_lambda1_path(est_cov(X, method = cov_method), p1, nlambda1, lambda1.min.ratio)
+  xtxs <- get_xtxs(X, p1, lam1s, cov_method)
 
   # Compute inital lambda1
   if (lam1_init == "random") {
@@ -272,10 +272,10 @@ scout_alternating_lasso <- function(X_train, Y_train, X_test, Y_test, p1,
     niter <- niter + 1
 
     # Compute best lambda2 for the current cov_x_est
-    cov_xy_est <- est_cov(X_train, Y_train, method = cov_method)
-    lam2s <- get_lambda2_path(X_train, Y_train, cov_x_est, cov_xy_est, 1, nlambda2, lambda2.min.ratio)
+    cov_xy_est <- est_cov(X, Y, method = cov_method)
+    lam2s <- get_lambda2_path(X, Y, cov_x_est, cov_xy_est, 1, nlambda2, lambda2.min.ratio)
     best_lam2_res <- get_best_lam2_lasso(
-      X_train, Y_train, X_test, Y_test,
+      X, Y, X_test, Y_test,
       meanx, meany, sdx, sdy,
       cov_x_est, lam2s, rescale, cov_method
     )
@@ -298,7 +298,7 @@ scout_alternating_lasso <- function(X_train, Y_train, X_test, Y_test, p1,
 
     # Update covariance est for next iteration
     best_lam1_res <- get_best_lam1(
-      X_train, Y_train, X_test, Y_test,
+      X, Y, X_test, Y_test,
       meanx, meany, sdx, sdy,
       p1, lam1s, xtxs, best_lam2_res$best_lam2, rescale, cov_method
     )
@@ -333,9 +333,9 @@ scout_alternating_lasso <- function(X_train, Y_train, X_test, Y_test, p1,
 #' regularization is assumed to be 1 (i.e., p2 = 1). splits training data into
 #' K folds and picks the result corresponding to fold with lowest RMSPE on
 #' validation data.
-#' @param X_train A matrix of predictors. Rows are observations and columns
+#' @param X A matrix of predictors. Rows are observations and columns
 #' are variables
-#' @param Y_train A vector of outcomes
+#' @param Y A vector of outcomes
 #' @param p1 L_p penalty for covariance regularization. must be 1 or 2
 #' @param nlambda1 number of regularization terms to use in covariance
 #' regularization step
@@ -358,33 +358,54 @@ scout_alternating_lasso <- function(X_train, Y_train, X_test, Y_test, p1,
 #' by regressing $y$ onto $x beta$? This is done in Witten and
 #' Tibshirani (2008) and is important for good performance. Default is
 #' TRUE.
+#' @param ddc_first whether or not to detect and impute cellwise outliers using
+#' DDC before computing estimates
+#' @param ddc_with_response whether or not to concatenate Y before running DDC. Only
+#' applicable if `ddc_first` is `TRUE`
 #' @param standardize whether or not to scale the training X and Y data
 #' before performing estimation
 #' @param lam1_init one of "random" or "max"
 #' @return a list with two objects:
-#' * mod: the scout object from fitting the full X_train and Y_test with
+#' * mod: the scout object from fitting the full X and Y_test with
 #'   scout(p1, 1) using the best lambdas from the cross-validation
 #' * best_cv_res: a list with the results of the cross-validation fold with
 #'   the lowest cross-validation error
 #' @export
-cv.scout_alternating_lasso <- function(X_train, Y_train, p1,
+cv.scout_alternating_lasso <- function(X, Y, p1,
                                        nlambda1 = 100, nlambda2 = 100,
                                        lambda1.min.ratio = 0.1, lambda2.min.ratio = 0.001,
                                        K = 5, tol = 1e-4, max_iter = 10,
                                        rescale = TRUE, standardize = TRUE,
                                        centerFun = mean, scaleFun = sd,
+                                       ddc_first = FALSE, ddc_with_response = FALSE,
                                        lam1_init = "random", cov_method = "default") {
-  folds <- cv.folds(nrow(X_train), K)
+  if (ddc_first) {
+    ddc_input <- if (ddc_with_response) cbind(X, Y) else X
+    ddc_res <- cellWise::DDC(ddc_input, DDCpars = list(fastDDC = TRUE, silent = TRUE))
+    ddc_imp <- ddc_res$Ximp
+
+    p <- ncol(X)
+    names_X <- colnames(X) # save old column names
+    X <- ddc_imp[, 1:p]
+    colnames(X) <- names_X
+    if (ddc_with_response) {
+      names_Y <- colnames(Y) # save old column names
+      Y <- as.matrix(ddc_imp[, (p + 1)], ncol = 1)
+      colnames(Y) <- names(Y)
+    }
+  }
+
+  folds <- cv.folds(nrow(X), K)
   # cv.folds returns list of length K where each item is a vector containing
-  # row indices of X_train for the validation set
+  # row indices of X for the validation set
 
   apply_res <- lapply(folds, function(validation_idx) {
-    X_train_cv <- X_train[-validation_idx, ]
-    Y_train_cv <- Y_train[-validation_idx, ]
-    X_val <- X_train[validation_idx, ]
-    Y_val <- Y_train[validation_idx, ]
+    X_cv <- X[-validation_idx, ]
+    Y_cv <- Y[-validation_idx, ]
+    X_val <- X[validation_idx, ]
+    Y_val <- Y[validation_idx, ]
     scout_alternating_lasso(
-      X_train_cv, Y_train_cv, X_val, Y_val, p1,
+      X_cv, Y_cv, X_val, Y_val, p1,
       nlambda1, nlambda2, lambda1.min.ratio, lambda2.min.ratio,
       tol, max_iter, rescale, standardize, centerFun, scaleFun,
       lam1_init, cov_method
@@ -398,7 +419,7 @@ cv.scout_alternating_lasso <- function(X_train, Y_train, p1,
 
   list(
     mod = scout(
-      X_train, Y_train,
+      X, Y,
       p1 = p1, p2 = 1,
       lam1s = best_lambda_pair[1], lam2s = best_lambda_pair[2],
       centerFun = mean, scaleFun = sd,

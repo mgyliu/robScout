@@ -5,8 +5,8 @@
 \title{cv.scout_alternating_lasso}
 \usage{
 cv.scout_alternating_lasso(
-  X_train,
-  Y_train,
+  X,
+  Y,
   p1,
   nlambda1 = 100,
   nlambda2 = 100,
@@ -19,15 +19,17 @@ cv.scout_alternating_lasso(
   standardize = TRUE,
   centerFun = mean,
   scaleFun = sd,
+  ddc_first = FALSE,
+  ddc_with_response = FALSE,
   lam1_init = "random",
   cov_method = "default"
 )
 }
 \arguments{
-\item{X_train}{A matrix of predictors. Rows are observations and columns
+\item{X}{A matrix of predictors. Rows are observations and columns
 are variables}
 
-\item{Y_train}{A vector of outcomes}
+\item{Y}{A vector of outcomes}
 
 \item{p1}{L_p penalty for covariance regularization. must be 1 or 2}
 
@@ -63,12 +65,18 @@ TRUE.}
 \item{standardize}{whether or not to scale the training X and Y data
 before performing estimation}
 
+\item{ddc_first}{whether or not to detect and impute cellwise outliers using
+DDC before computing estimates}
+
+\item{ddc_with_response}{whether or not to concatenate Y before running DDC. Only
+applicable if \code{ddc_first} is \code{TRUE}}
+
 \item{lam1_init}{one of "random" or "max"}
 }
 \value{
 a list with two objects:
 \itemize{
-\item mod: the scout object from fitting the full X_train and Y_test with
+\item mod: the scout object from fitting the full X and Y_test with
 scout(p1, 1) using the best lambdas from the cross-validation
 \item best_cv_res: a list with the results of the cross-validation fold with
 the lowest cross-validation error

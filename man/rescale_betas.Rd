@@ -4,12 +4,12 @@
 \alias{rescale_betas}
 \title{Rescales beta estimates as in Step 4 of the Scout algo (Witten & Tibshirani)}
 \usage{
-rescale_betas(X_train, Y_train, betamat)
+rescale_betas(X, Y, betamat)
 }
 \arguments{
-\item{X_train}{standardized training data}
+\item{X}{standardized training data}
 
-\item{Y_train}{standardized training response}
+\item{Y}{standardized training response}
 
 \item{betamat}{a matrix where each column is a beta_hat estimate for some
 regularization parameter}

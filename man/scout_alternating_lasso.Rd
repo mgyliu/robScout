@@ -5,8 +5,8 @@
 \title{scout_alternating_lasso}
 \usage{
 scout_alternating_lasso(
-  X_train,
-  Y_train,
+  X,
+  Y,
   X_test,
   Y_test,
   p1,
@@ -25,10 +25,10 @@ scout_alternating_lasso(
 )
 }
 \arguments{
-\item{X_train}{A matrix of predictors. Rows are observations and columns
+\item{X}{A matrix of predictors. Rows are observations and columns
 are variables}
 
-\item{Y_train}{A vector of outcomes}
+\item{Y}{A vector of outcomes}
 
 \item{X_test}{A matrix of predictors (test set)}
 

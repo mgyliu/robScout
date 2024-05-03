@@ -29,6 +29,7 @@ scout1something.huge <- function(x, y, p2, lam1s, lam2s, rescale, cov_method, sc
             } else {
                 scout::crossProdLasso(g.out.all$cov[[i]], cov.est.xy, rho = lam2s[j])$beta
             }
+
             # Scaling coefficient, scout step 4
             # For simple linear regression w/o intercept, the coefficient of regression
             # of X*beta onto Y is the same as:
