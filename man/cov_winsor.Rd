@@ -4,12 +4,14 @@
 \alias{cov_winsor}
 \title{cov_winsor}
 \usage{
-cov_winsor(X, Y = NULL)
+cov_winsor(X, Y = NULL, correlation = FALSE)
 }
 \arguments{
 \item{X}{a nxp matrix}
 
 \item{Y}{a nx1 vector or NULL}
+
+\item{correlation}{if TRUE, returns a correlation matrix}
 }
 \value{
 a pxp matrix if Y is NULL; otherwise, a length-p vector.

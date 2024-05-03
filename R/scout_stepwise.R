@@ -24,6 +24,7 @@
 #' This is ignored if standardize is `FALSE`
 #' @param scaleFun a function to compute an estimate of the scale of a variable.
 #' This is ignored if standardize is `FALSE`
+#' @param rescale should coefficients be re-scaled by a constant?
 #' @details `cov_method` can be one of the following:
 #' * `default`: computes the default covariance with \code{\link{cov}}
 #' * `winsor`: computes the covariance matrix based on adjusted multivariate Winsorization,
@@ -41,7 +42,8 @@ scout_1something_stepwise <- function(X, Y, p2, K = 5,
                                       ddc_first = FALSE,
                                       ddc_with_response = FALSE,
                                       standardize = TRUE,
-                                      centerFun = mean, scaleFun = sd) {
+                                      centerFun = mean, scaleFun = sd,
+                                      rescale = TRUE) {
     if (ddc_first) {
         ddc_input <- if (ddc_with_response) cbind(X, Y) else X
         ddc_res <- cellWise::DDC(ddc_input, DDCpars = list(fastDDC = TRUE, silent = TRUE))
@@ -73,6 +75,7 @@ scout_1something_stepwise <- function(X, Y, p2, K = 5,
             p1 = 1, p2 = p2,
             lam1s = g.res$best_lambda, standardize = standardize,
             centerFun = centerFun, scaleFun = scaleFun,
+            rescale = rescale,
             cov_method = cov_method
         )
     } else if (p2 == 1) {
@@ -84,6 +87,7 @@ scout_1something_stepwise <- function(X, Y, p2, K = 5,
             nlambda2 = nlambda2,
             lambda2.min.ratio = lambda2.min.ratio,
             standardize = standardize,
+            rescale = rescale,
             centerFun = centerFun, scaleFun = scaleFun,
             cov_method = cov_method
         )
@@ -93,6 +97,7 @@ scout_1something_stepwise <- function(X, Y, p2, K = 5,
             lam1s = g.res$best_lambda,
             lam2s = cv.res$bestlam2,
             standardize = standardize,
+            rescale = rescale,
             centerFun = centerFun, scaleFun = scaleFun,
             cov_method = cov_method
         )

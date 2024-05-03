@@ -19,7 +19,8 @@ scout_1something_stepwise(
   ddc_with_response = FALSE,
   standardize = TRUE,
   centerFun = mean,
-  scaleFun = sd
+  scaleFun = sd,
+  rescale = TRUE
 )
 }
 \arguments{
@@ -57,6 +58,8 @@ This is ignored if standardize is \code{FALSE}}
 
 \item{scaleFun}{a function to compute an estimate of the scale of a variable.
 This is ignored if standardize is \code{FALSE}}
+
+\item{rescale}{should coefficients be re-scaled by a constant?}
 }
 \value{
 list of
