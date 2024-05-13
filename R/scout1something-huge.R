@@ -34,10 +34,18 @@ scout1something.huge <- function(x, y, p2, lam1s, lam2s, rescale, cov_method, sc
             # For simple linear regression w/o intercept, the coefficient of regression
             # of X*beta onto Y is the same as:
             #   cor(x%*%beta, y) / sd(x%*%beta) * sd(y)
-            c.beta <- if (rescale & sum(abs(beta)) != 0) {
-                as.numeric(est_cov(x %*% beta, y, method = cov_method, correlation = TRUE) * scaleFun(y) / scaleFun(x %*% beta))
-            } else {
-                1
+            #
+            # For Y ~ X, both univariate, \hat{B} = \rho{xy} * sd(y)/sd(x)
+            # browser()
+            c.beta <- 1
+            if (rescale & sum(abs(beta)) != 0) {
+                # [var(y) cov(hat(y), y)]
+                #        var(hat(y))
+
+                # cov(y,hat(y)) / var(hat(y))
+                cov_tmp <- est_cov(cbind(x %*% beta, y), method = cov_method)
+                c.beta <- cov_tmp[1, 2] / cov_tmp[1, 1]
+                # as.numeric(est_cov(x %*% beta, y, method = cov_method, correlation = TRUE) * scaleFun(y) / scaleFun(x %*% beta))
             }
 
             betamat[i, j, ] <- beta * c.beta
