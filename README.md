@@ -6,7 +6,7 @@ Most of the core code is copied from https://github.com/cran/scout, which is the
 
 ## Installation
 
-```
+```r
 devtools::install_github("mgyliu/robscout")
 ```
 
@@ -15,7 +15,7 @@ devtools::install_github("mgyliu/robscout")
 Suppose you have training data `X_train` and `Y_train`. 
 
 To run robScout(1,1) with DDC as the preprocessing step:
-```{r}
+```r
 library(robscout)
 
 K <- 5 # Number of folds to use in cross-validation
@@ -28,7 +28,7 @@ scout_1something_stepwise(
 ```
 
 To run robScout(2,1) with DDC as the preprocessing step:
-```{r}
+```r
 K <- 5 # Number of folds to use in cross-validation
 cv.scout_alternating_lasso(
     X_train, Y_train,
