@@ -138,7 +138,7 @@ scout <- function(x, y, newx = NULL, p1 = 2, p2 = 1,
         }
     } else if (p1 == 1) {
         # betamat <- scout1something(x, y, p2, lam1s, lam2s, rescale, cov_method)
-        betamat <- scout1something.huge(x, y, p2, lam1s, lam2s, rescale, cov_method, scaleFun)
+        betamat <- scout1something.huge(x, y, p2, lam1s, lam2s, rescale, cov_method)
     } else if (p1 == 2) {
         betamat <- scout2something(x, y, p2, lam1s, lam2s, rescale, cov_method)
     }

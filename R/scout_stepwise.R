@@ -45,19 +45,13 @@ scout_1something_stepwise <- function(X, Y, p2, K = 5,
                                       centerFun = mean, scaleFun = sd,
                                       rescale = TRUE) {
     if (ddc_first) {
-        ddc_input <- if (ddc_with_response) cbind(X, Y) else X
-        ddc_res <- cellWise::DDC(ddc_input, DDCpars = list(fastDDC = TRUE, silent = TRUE))
-        ddc_imp <- ddc_res$Ximp
-
-        p <- ncol(X)
-        names_X <- colnames(X) # save old column names
-        X <- ddc_imp[, 1:p]
-        colnames(X) <- names_X
         if (ddc_with_response) {
-            names_Y <- colnames(Y) # save old column names
-            Y <- as.matrix(ddc_imp[, (p + 1)], ncol = 1)
-            colnames(Y) <- names(Y)
+            ddc_res <- run_ddc(X, Y)
+            Y <- ddc_res$Y
+        } else {
+            ddc_res <- run_ddc(X)
         }
+        X <- ddc_res$X
     }
 
     # Use standardized X to find best lambda1

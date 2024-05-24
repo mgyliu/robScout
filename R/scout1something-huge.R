@@ -1,5 +1,5 @@
 # Same as scout1something.R but using huge::huge.glasso instead
-scout1something.huge <- function(x, y, p2, lam1s, lam2s, rescale, cov_method, scaleFun) {
+scout1something.huge <- function(x, y, p2, lam1s, lam2s, rescale, cov_method) {
     # if (ncol(x) > 500) {
     #     print("You are running scout with p1=1 and ncol(x) > 500. This will be slow. You may want to re-start and use p1=2, which is much faster.")
     # }
@@ -36,22 +36,15 @@ scout1something.huge <- function(x, y, p2, lam1s, lam2s, rescale, cov_method, sc
             #   cor(x%*%beta, y) / sd(x%*%beta) * sd(y)
             #
             # For Y ~ X, both univariate, \hat{B} = \rho{xy} * sd(y)/sd(x)
-            # browser()
             c.beta <- 1
             if (rescale & sum(abs(beta)) != 0) {
-                # [var(y) cov(hat(y), y)]
-                #        var(hat(y))
-
-                # cov(y,hat(y)) / var(hat(y))
                 cov_tmp <- est_cov(cbind(x %*% beta, y), method = cov_method)
                 c.beta <- cov_tmp[1, 2] / cov_tmp[1, 1]
-                # as.numeric(est_cov(x %*% beta, y, method = cov_method, correlation = TRUE) * scaleFun(y) / scaleFun(x %*% beta))
             }
 
             betamat[i, j, ] <- beta * c.beta
         }
     }
 
-    # return(list(betamat = betamat, c.betamat = c.betamat, x.betamat = x.betamat, y.mat = y.mat))
     return(betamat)
 }
