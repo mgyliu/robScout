@@ -1,15 +1,23 @@
 ---
-title: "Applied example using simulated data"
-output: 
-  rmarkdown::html_vignette:
-    toc: true 
-vignette: > 
-    \usepackage{amsmath}
+title: "simulated_example"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{simulated_example}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+  \usepackage{amsmath}
 ---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
 
 This vignette goes through a simulated data example to demonstrate how the package works.
 
-```{r library, message=F}
+```{r setup, message=F}
 library(robscout)
 library(tidyverse)
 library(glue)
@@ -36,7 +44,7 @@ snr <- 1
 # Make an AR1 covariance
 Sigma <- matrix(rep(0, p * p), nrow = p)
 Sigma <- outer(1:nrow(Sigma), 1:ncol(Sigma),
-    FUN = function(r, c) rho^(abs(r - c))
+  FUN = function(r, c) rho^(abs(r - c))
 )
 
 # Set the coefficients
@@ -75,13 +83,13 @@ The relevant arguments that one might want to set are:
 
 ```{r fit-scout}
 scout_11_result <- scout_1something_stepwise(
-    X_train, Y_train,
-    p2 = 1,
-    K = 5, # number of CV folds
-    nlambda1 = 10, # 100 by default, use less for demo purposes
-    nlambda2 = 10,
-    ddc_first = TRUE,
-    ddc_with_response = TRUE
+  X_train, Y_train,
+  p2 = 1,
+  K = 5, # number of CV folds
+  nlambda1 = 10, # 100 by default, use less for demo purposes
+  nlambda2 = 10,
+  ddc_first = TRUE,
+  ddc_with_response = TRUE
 )
 ```
 
@@ -124,25 +132,25 @@ perry::rmspe(preds, Y_test) / sigma
 # Evaluate how well we did in variable selection
 # L2 distance between true and estimated betas
 stats::dist(
-    rbind(as.numeric(coefficients(scout_11_result$mod)), beta),
-    method = "euclidean"
+  rbind(as.numeric(coefficients(scout_11_result$mod)), beta),
+  method = "euclidean"
 )
 ```
 
 ```{r plot-betas, fig.height=2, fig.width=7}
 # Plot heatmap of true betas and estimated betas
 data.frame(
-    true_beta = beta == 0,
-    robscout_11_beta = as.numeric(coefficients(scout_11_result$mod)) == 0
+  true_beta = beta == 0,
+  robscout_11_beta = as.numeric(coefficients(scout_11_result$mod)) == 0
 ) |>
-    as_tibble() |>
-    rowid_to_column("id") |>
-    pivot_longer(-id, names_to = "Method", values_to = "Selected") |>
-    ggplot(aes(x = id, y = Method, fill = Selected)) +
-    geom_tile(color = "white") +
-    scale_fill_manual(values = list(
-        "FALSE" = "grey",
-        "TRUE" = "black"
-    )) +
-    theme(legend.position = "bottom")
+  as_tibble() |>
+  rowid_to_column("id") |>
+  pivot_longer(-id, names_to = "Method", values_to = "Selected") |>
+  ggplot(aes(x = id, y = Method, fill = Selected)) +
+  geom_tile(color = "white") +
+  scale_fill_manual(values = list(
+    "FALSE" = "grey",
+    "TRUE" = "black"
+  )) +
+  theme(legend.position = "bottom")
 ```
