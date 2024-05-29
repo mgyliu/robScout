@@ -7,7 +7,8 @@ Most of the core code is copied from https://github.com/cran/scout, which is the
 ## Installation
 
 ```r
-devtools::install_github("mgyliu/robscout")
+devtools::install_github("mgyliu/robscout", dependencies = TRUE, build_vignettes = TRUE)
+vignette("simulated_example")
 ```
 
 # Example
