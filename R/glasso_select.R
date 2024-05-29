@@ -136,15 +136,16 @@ glasso_select <- function(X, X.test,
 #' @title icov_eval
 #' @description Computes either a log likelihood or BIC criterion for
 #' a given precisoin matrix estimate. `bic` is the BIC described in
-#' (Yuan and Lin, 2007). `ebic` is the extended BIC described in
-#' (Foygel and Drton, 2010). `loglik` is the log likelihood
+#' (Yuan and Lin, 2007). `loglik` is the log likelihood
 #' @param icov inverse covariance estimate
 #' @param cov covariance estimate
 #' @param n number of rows in original data matrix
-#' @param method one of "loglik", "bic", "ebic"
+#' @param method one of "loglik", "bic"
 #' @export
-icov_eval <- function(icov, cov, n, method = "ebic") {
-  stopifnot(method %in% c("loglik", "bic", "ebic"))
+icov_eval <- function(icov, cov, n, method = "bic") {
+  # `ebic` is the extended BIC described in (Foygel and Drton, 2010)
+  # not implemented for now since it is more suitable for p approx equal to n
+  stopifnot(method %in% c("loglik", "bic"))
 
   # negative log likelihood = - log |Theta| + tr(Theta * Sigma)
   neg_loglik <- -determinant(icov, logarithm = TRUE)$modulus[[1]] + sum(diag(icov %*% cov))

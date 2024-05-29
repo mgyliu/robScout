@@ -42,7 +42,8 @@ scout_1something_stepwise(
 
 \item{cov_method}{a string indicating which covariance matrix to use. See below for details}
 
-\item{glasso_crit}{a string indicating which criteria to minimize in glasso}
+\item{glasso_crit}{a string indicating which criteria to minimize in glasso. One of
+"bic" or "loglik"}
 
 \item{ddc_first}{whether or not to detect and impute cellwise outliers using
 DDC before computing estimates}

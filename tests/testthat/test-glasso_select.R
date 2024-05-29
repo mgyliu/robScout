@@ -38,7 +38,7 @@ test_that("glasso_select returns a list with the right items", {
   X <- gen_data()$X
   X.test <- gen_data(n = 10)$X
   gs_res <- glasso_select(X, X.test,
-    cov_method = "default", crit = "ebic",
+    cov_method = "default", crit = "bic",
     nlambda = 5, lambda.min.ratio = 0.1
   )
 

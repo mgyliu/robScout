@@ -4,7 +4,7 @@
 \alias{icov_eval}
 \title{icov_eval}
 \usage{
-icov_eval(icov, cov, n, method = "ebic")
+icov_eval(icov, cov, n, method = "bic")
 }
 \arguments{
 \item{icov}{inverse covariance estimate}
@@ -13,11 +13,10 @@ icov_eval(icov, cov, n, method = "ebic")
 
 \item{n}{number of rows in original data matrix}
 
-\item{method}{one of "loglik", "bic", "ebic"}
+\item{method}{one of "loglik", "bic"}
 }
 \description{
 Computes either a log likelihood or BIC criterion for
 a given precisoin matrix estimate. \code{bic} is the BIC described in
-(Yuan and Lin, 2007). \code{ebic} is the extended BIC described in
-(Foygel and Drton, 2010). \code{loglik} is the log likelihood
+(Yuan and Lin, 2007). \code{loglik} is the log likelihood
 }

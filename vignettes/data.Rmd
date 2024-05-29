@@ -1,0 +1,148 @@
+---
+title: "Applied example using simulated data"
+output: 
+  rmarkdown::html_vignette:
+    toc: true 
+vignette: > 
+    \usepackage{amsmath}
+---
+
+This vignette goes through a simulated data example to demonstrate how the package works.
+
+```{r library, message=F}
+library(robscout)
+library(tidyverse)
+library(glue)
+```
+
+# Generate data
+
+We will generate data according to the low-dimensional AR1 model shown in the paper. Specifically, 
+
+* The dimensions are $n = 50$ training observations with $p = 40$ predictor variables
+* $X \sim N(0_p,\Sigma)$ where $\Sigma_{ij} = \rho^{\vert i-j \vert}$
+* $Y = X \beta + \epsilon$ where $\beta = (1.5, 0.5, 0, 1, 0, 0, 1.5, 0, 0, 0, 1, 0, \dots, 0)$ and $\epsilon \sim N(0,\sigma^2)$
+* $\sigma$ is chosen such that the SNR = $\frac{\beta^T \Sigma \beta}{\sigma^2}$ is 1
+* In the testing data, we use 1000 clean observations from the same model
+
+```{r sim-data}
+set.seed(2024)
+
+n <- 50
+p <- 40
+rho <- 0.5
+snr <- 1
+
+# Make an AR1 covariance
+Sigma <- matrix(rep(0, p * p), nrow = p)
+Sigma <- outer(1:nrow(Sigma), 1:ncol(Sigma),
+    FUN = function(r, c) rho^(abs(r - c))
+)
+
+# Set the coefficients
+beta <- c(c(1.5, 0.5, 0, 1, 0, 0, 1.5, 0, 0, 0, 1), rep(0, 40 - 11))
+
+# Compute the noise (sigma)
+signal <- as.numeric(t(beta) %*% Sigma %*% beta)
+sigma <- sqrt(signal / snr)
+
+# Training data
+X_train <- MASS::mvrnorm(n = n, mu = rep(0, p), Sigma = Sigma)
+epsilon <- rnorm(n, 0, sigma)
+Y_train <- X_train %*% beta + epsilon
+
+# Testing data
+X_test <- MASS::mvrnorm(n = 1000, mu = rep(0, p), Sigma = Sigma)
+epsilon_test <- rnorm(n, 0, sigma)
+Y_test <- X_test %*% beta + epsilon_test
+```
+
+# Fit robScout(1,1)
+
+The robScout(1,1) implementation follows a stepwise approach:
+
+1. It uses DDC to clean cellwise outliers from the training data 
+2. It selects a sparse graphical model by the GLASSO by minimizing the _Extended BIC_ criterion. This results in an optimal choice of $\lambda_1$
+3. Fixing the $\lambda_1$ from the first step, it selects a sparse coefficient vector by minimizing the cross-validation error (RMSPE)
+
+The relevant arguments that one might want to set are: 
+
+* `p2`: L-norm in the second optimization step in the scout. Use `p2 = 1` for the L1 norm (sparse coefficients), and `p2 = 2` for the L2 norm (nonsparse coefficients)
+* `ddc_first`: whether or not to run DDC in the first step. When this is `FALSE`, the function will run non-robust scout using the stepwise algorithm 
+* `ddc_with_response`: whether or not to concatenate the response (`Y`) when running DDC. Should usually be `TRUE` 
+* `cov_method`: should be `default` if running this function with DDC. The other options are available if you want to use other covariance estimators with the GLASSO step. 
+* `glasso_crit`: using `bic` means that we are minimizing the BIC criterion by Yuan and Lin (2007). This is the default, although you could also use `loglik`, which results in minimizing the negative log likelihood.
+
+```{r fit-scout}
+scout_11_result <- scout_1something_stepwise(
+    X_train, Y_train,
+    p2 = 1,
+    K = 5, # number of CV folds
+    nlambda1 = 10, # 100 by default, use less for demo purposes
+    nlambda2 = 10,
+    ddc_first = TRUE,
+    ddc_with_response = TRUE
+)
+```
+
+The result object is a list with 3 items: `cv.res`, `g.res`, and `mod`.
+
+```{r inspect}
+names(scout_11_result)
+
+# Full results of the cross-validation. This gives us the best lambda 1 and 2
+names(scout_11_result$cv.res)
+print(glue("bestlam1 = {round(scout_11_result$cv.res$bestlam1, 2)}, bestlam2 = {round(scout_11_result$cv.res$bestlam2, 2)}"))
+
+# Full results of the glasso step
+names(scout_11_result$g.res)
+# The $errors component will show us the BIC for each lambda
+scout_11_result$g.res$errors
+# The $best_lambda component gives us the optimal lambda2
+scout_11_result$g.res$best_lambda
+
+# Finally, the final fitted model can be obtained.
+# This is the result of fitting the scout on the full training data, using bestlam1 and bestlam2
+# From here we can extract coefficients
+scout_11_result$mod
+as.numeric(coefficients(scout_11_result$mod))
+
+# We can also get the estimated intercept
+scout_11_result$mod$intercept
+```
+
+# Predictions & Evaluation
+
+Now that we have coefficients, we can make predictions and compute a prediction/estimation error
+```{r prediction}
+preds <- as.numeric(predict(scout_11_result$mod, X_test, use_intercept = TRUE))
+
+# Evaluate how well we did using RMSPE/sigma
+# Lowest possible value is 1, and anything above 2 would be considered quite bad
+perry::rmspe(preds, Y_test) / sigma
+
+# Evaluate how well we did in variable selection
+# L2 distance between true and estimated betas
+stats::dist(
+    rbind(as.numeric(coefficients(scout_11_result$mod)), beta),
+    method = "euclidean"
+)
+```
+
+```{r plot-betas, fig.height=2, fig.width=7}
+# Plot heatmap of true betas and estimated betas
+data.frame(
+    true_beta = beta == 0,
+    robscout_11_beta = as.numeric(coefficients(scout_11_result$mod)) == 0
+) |>
+    as_tibble() |>
+    rowid_to_column("id") |>
+    pivot_longer(-id, names_to = "Method", values_to = "Selected") |>
+    ggplot(aes(x = id, y = Method, fill = Selected)) +
+    geom_tile(color = "white") +
+    scale_fill_manual(values = list(
+        "FALSE" = "grey",
+        "TRUE" = "black"
+    )) +
+    theme(legend.position = "bottom")
+```
