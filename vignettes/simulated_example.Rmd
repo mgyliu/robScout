@@ -79,7 +79,7 @@ The relevant arguments that one might want to set are:
 * `ddc_first`: whether or not to run DDC in the first step. When this is `FALSE`, the function will run non-robust scout using the stepwise algorithm 
 * `ddc_with_response`: whether or not to concatenate the response (`Y`) when running DDC. Should usually be `TRUE` 
 * `cov_method`: should be `default` if running this function with DDC. The other options are available if you want to use other covariance estimators with the GLASSO step. 
-* `glasso_crit`: using `bic` means that we are minimizing the BIC criterion by Yuan and Lin (2007). This is the default, although you could also use `loglik`, which results in minimizing the negative log likelihood.
+* `glasso_crit`: using `ebic` means that we are minimizing the Extended BIC by Foygel and Drton (2010). Also available are `bic`, corresonding to the BIC by Yuan and Lin (2007), and `loglik`, which results in minimizing the negative log likelihood.
 
 ```{r fit-scout}
 scout_11_result <- scout_1something_stepwise(

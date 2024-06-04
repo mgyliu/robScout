@@ -4,7 +4,7 @@
 \alias{icov_eval}
 \title{icov_eval}
 \usage{
-icov_eval(icov, cov, n, method = "bic")
+icov_eval(icov, cov, n, method = "ebic")
 }
 \arguments{
 \item{icov}{inverse covariance estimate}
@@ -13,7 +13,7 @@ icov_eval(icov, cov, n, method = "bic")
 
 \item{n}{number of rows in original data matrix}
 
-\item{method}{one of "loglik", "bic"}
+\item{method}{one of "loglik", "bic", "ebic"}
 }
 \description{
 Computes either a log likelihood or BIC criterion for

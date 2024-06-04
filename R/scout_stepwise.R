@@ -14,7 +14,7 @@
 #' @param lambda2.min.ratio smallest value of lambda2 as a fraction of lambda2_max
 #' @param cov_method a string indicating which covariance matrix to use. See below for details
 #' @param glasso_crit a string indicating which criteria to minimize in glasso. One of
-#' "bic" or "loglik"
+#' "ebic", "bic" or "loglik". It is "ebic" by default.
 #' @param ddc_first whether or not to detect and impute cellwise outliers using
 #' DDC before computing estimates
 #' @param ddc_with_response whether or not to concatenate Y before running DDC. Only
@@ -39,7 +39,7 @@ scout_1something_stepwise <- function(X, Y, p2, K = 5,
                                       nlambda1 = 100, lambda1.min.ratio = 0.1,
                                       nlambda2 = 100, lambda2.min.ratio = 0.1,
                                       cov_method = "default",
-                                      glasso_crit = "bic",
+                                      glasso_crit = "ebic",
                                       ddc_first = FALSE,
                                       ddc_with_response = FALSE,
                                       standardize = TRUE,

@@ -26,7 +26,7 @@ huge_glasso_lambda_seq <- function(S, nlambda, lambda.min.ratio = 0.1) {
 #' @param lambda.min.ratio smallest value of lambda as a fraction of lambda_max
 #' @param lambdas sequence of lambda values. This function will generate its own lambda sequence
 #' if this is NULL. If provided, `nlambda` and `lambda.min.ratio` are ignored.
-#' @param crit criteria to select the optimal lambda. one of "bic" or "loglik"
+#' @param crit criteria to select the optimal lambda. one of "ebic", "bic", or "loglik"
 #' @param scr whether to use lossy screening in huge.glasso
 #' @param verbose whether to let huge.glasso print progress messages
 #' @return result of running huge::huge.glasso on the ideal lambda found from cv
@@ -82,7 +82,7 @@ glasso_cv <- function(X, K, cov_method, crit, folds = NULL, nlambda = 100, lambd
 #' @param X feature matrix, \eqn{n_1 \times p}
 #' @param X.test feature matrix to test against, \eqn{n_2 \times p}
 #' @param cov_method a string indicating which covariance matrix to use. See below for details
-#' @param crit criteria to select the optimal lambda. one of "bic" or "loglik"
+#' @param crit criteria to select the optimal lambda. one of "bic", "ebic", or "loglik"
 #' @param nlambda number of lambdas to optimize over
 #' @param lambda.min.ratio smallest value of lambda as a fraction of lambda_max
 #' @param lambdas a sequence of lambda values (decreasing order). If provided,
@@ -140,23 +140,27 @@ glasso_select <- function(X, X.test,
 #' @param icov inverse covariance estimate
 #' @param cov covariance estimate
 #' @param n number of rows in original data matrix
-#' @param method one of "loglik", "bic"
+#' @param method one of "loglik", "bic", "ebic"
 #' @export
-icov_eval <- function(icov, cov, n, method = "bic") {
-  # `ebic` is the extended BIC described in (Foygel and Drton, 2010)
+icov_eval <- function(icov, cov, n, method = "ebic") {
+  # `ebic` is the extended BIC described in (Foygel and Drton, 2010)``
   # not implemented for now since it is more suitable for p approx equal to n
-  stopifnot(method %in% c("loglik", "bic"))
+  stopifnot(method %in% c("loglik", "bic", "ebic"))
 
   # negative log likelihood = - log |Theta| + tr(Theta * Sigma)
   neg_loglik <- -determinant(icov, logarithm = TRUE)$modulus[[1]] + sum(diag(icov %*% cov))
 
+  # esum counts how many unique pairs of variables have non-zero
+  # partial correlation with each other
+  # i.e., the number of edges in the estimated graph
+  esum <- sum(abs(icov[lower.tri(icov)]) > 1e-8)
+
   if (method == "bic") {
-    # esum is \sum_{i \leq j} \hat{e}_{ij}
-    # where \hat{e}_ij = 0 if \Theta_{ij} = 0 and 1 otherwise
-    # i.e., count how many unique pairs of variables have non-zero
-    # partial correlation with each other (and include the diagonal)
-    esum <- sum(abs(icov[lower.tri(icov, diag = T)]) > 1e-8)
     return(neg_loglik + (log(n) / n) * esum)
+  } else if (method == "ebic") {
+    gamma <- 0.5
+    p <- nrow(icov)
+    return(neg_loglik + (log(n) / n) * esum + esum * gamma * 4 * log(p) / n)
   }
 
   return(neg_loglik)

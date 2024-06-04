@@ -22,7 +22,7 @@ glasso_cv(
 
 \item{cov_method}{a string indicating which covariance matrix to use. One of "default" or "winsor"}
 
-\item{crit}{criteria to select the optimal lambda. one of "bic" or "loglik"}
+\item{crit}{criteria to select the optimal lambda. one of "ebic", "bic", or "loglik"}
 
 \item{folds}{a list of length K containing the indices of the test set in each CV fold}
 

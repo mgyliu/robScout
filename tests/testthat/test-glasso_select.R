@@ -32,6 +32,10 @@ test_that("icov_eval works", {
   # Generate inverse of covariance with small amount of error
   icov <- solve(cov) + rnorm(p^2, 0, 0.001)
   expect_equal(length(icov_eval(icov, cov, 50, "bic")), 1)
+  expect_equal(length(icov_eval(icov, cov, 50, "ebic")), 1)
+  expect_equal(length(icov_eval(icov, cov, 50, "loglik")), 1)
+  # should give an error if crit is not implemented
+  expect_error(icov_eval(icov, cov, 50, "blah"))
 })
 
 test_that("glasso_select returns a list with the right items", {

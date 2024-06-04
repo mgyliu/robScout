@@ -14,7 +14,7 @@ scout_1something_stepwise(
   nlambda2 = 100,
   lambda2.min.ratio = 0.1,
   cov_method = "default",
-  glasso_crit = "bic",
+  glasso_crit = "ebic",
   ddc_first = FALSE,
   ddc_with_response = FALSE,
   standardize = TRUE,
@@ -43,7 +43,7 @@ scout_1something_stepwise(
 \item{cov_method}{a string indicating which covariance matrix to use. See below for details}
 
 \item{glasso_crit}{a string indicating which criteria to minimize in glasso. One of
-"bic" or "loglik"}
+"ebic", "bic" or "loglik". It is "ebic" by default.}
 
 \item{ddc_first}{whether or not to detect and impute cellwise outliers using
 DDC before computing estimates}

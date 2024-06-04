@@ -23,7 +23,7 @@ glasso_select(
 
 \item{cov_method}{a string indicating which covariance matrix to use. See below for details}
 
-\item{crit}{criteria to select the optimal lambda. one of "bic" or "loglik"}
+\item{crit}{criteria to select the optimal lambda. one of "bic", "ebic", or "loglik"}
 
 \item{nlambda}{number of lambdas to optimize over}
 
